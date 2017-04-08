@@ -287,6 +287,8 @@
     <Compile Include="Messaging\StreamingMessageHandlerTests.cs" />
     <Compile Include="Queues\FileCommandQueueHandlerTests.cs" />
     <Compile Include="RegressionTests.cs" />
+    <Compile Include="RiskManager\RiskManagerQcAlgorithmRunnerTests.cs" />
+    <Compile Include="RiskManager\RiskManagerTests.cs" />
     <Compile Include="Symbols.cs" />
     <Compile Include="TestExtensions.cs" />
     <Compile Include="Indicators\LinearWeightedMovingAverageTests.cs" />

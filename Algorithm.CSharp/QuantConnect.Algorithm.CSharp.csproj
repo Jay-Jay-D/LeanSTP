@@ -134,6 +134,10 @@
     <Compile Include="OpeningBreakoutAlgorithm.cs" />
     <Compile Include="DropboxUniverseSelectionAlgorithm.cs" />
     <Compile Include="ParameterizedAlgorithm.cs" />
+    <Compile Include="RiskManager\ConstantVolatilityModel.cs" />
+    <Compile Include="RiskManager\FxRiskManagment.cs" />
+    <Compile Include="RiskManager\RiskManagerTestingAlgorithm.cs" />
+    <Compile Include="RiskManager\RiskManagerTestingAlgorithms.cs" />
     <Compile Include="UniverseSelectionDefinitionsAlgorithm.cs" />
     <Compile Include="UserDefinedUniverseAlgorithm.cs" />
     <Compile Include="WarmupAlgorithm.cs" />
