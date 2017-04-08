@@ -38,7 +38,7 @@ namespace QuantConnect.Tests
 
         public static void RunLocalBacktest(string algorithm, Dictionary<string, string> expectedStatistics, Language language)
         {
-            Composer.Instance.Reset();
+            
             var backtestingResultHandler = RunAlgorithm(algorithm, language);
 
             var statistics = backtestingResultHandler.FinalStatistics;
@@ -51,7 +51,6 @@ namespace QuantConnect.Tests
 
         public static void RunLocalBacktest(string algorithm)
         {
-            Composer.Instance.Reset();
             var backtestingResultHandler = RunAlgorithm(algorithm);
             var testsResults = backtestingResultHandler.Algorithm.RuntimeStatistics;
 
@@ -64,6 +63,7 @@ namespace QuantConnect.Tests
         private static BacktestingResultHandler RunAlgorithm(string algorithm, Language language = Language.CSharp)
         {
             BacktestingResultHandler backtestingResultHandler = null;
+            Composer.Instance.Reset();
             try
             {
                 // set the configuration up

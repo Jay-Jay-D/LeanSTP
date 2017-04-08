@@ -1,27 +1,26 @@
-﻿using NUnit.Framework;
-using QuantConnect.Algorithm.CSharp;
+﻿using System;
+using System.Collections.Generic;
+using NUnit.Framework;
+using QuantConnect.Algorithm.CSharp.RiskManager;
 using QuantConnect.Data;
 using QuantConnect.Data.Market;
 using QuantConnect.Orders;
 using QuantConnect.Orders.Fees;
 using QuantConnect.Orders.Fills;
 using QuantConnect.Securities;
-using QuantConnect.Tests.RiskManager;
-using System;
-using System.Collections.Generic;
 
-namespace QuantConnect.Tests
+namespace QuantConnect.Tests.RiskManager
 {
     [TestFixture]
     public class RiskManagerTests
     {
+        private readonly DateTime _firstObservation = new DateTime(2011, 11, 02);
 
-        DateTime _firstObservation = new DateTime(2011, 11, 02);
-        Dictionary<string, decimal[]> _rawData = new Dictionary<string, decimal[]>
+        private readonly Dictionary<string, decimal[]> _rawData = new Dictionary<string, decimal[]>
         {
-            {"EURUSD",  new decimal[] { 1.094175m, 1.094205m, 1.094365m, 1.09473m, 1.09414m,  1.09441m,  1.094605m, 1.094465m, 1.09452m,  1.09431m,
+            {"EURUSD",  new[] { 1.094175m, 1.094205m, 1.094365m, 1.09473m, 1.09414m,  1.09441m,  1.094605m, 1.094465m, 1.09452m,  1.09431m,
                                         1.09412m,  1.09417m,  1.09387m,  1.09394m, 1.094455m, 1.094465m, 1.09438m,  1.09469m,  1.094995m, 1.09499m } },
-            {"USDJPY",  new decimal[] {99.289m,  99.2895m, 99.2835m, 99.283m,  99.2805m, 99.2785m, 99.281m,  99.276m,  99.2715m,  99.2475m,
+            {"USDJPY",  new[] {99.289m,  99.2895m, 99.2835m, 99.283m,  99.2805m, 99.2785m, 99.281m,  99.276m,  99.2715m,  99.2475m,
                                        99.2405m, 99.2495m, 99.231m,  99.2285m, 99.219m,  99.221m,  99.222m,  99.222m,  99.2395m,  99.2325m } }
         };
 
@@ -94,7 +93,7 @@ namespace QuantConnect.Tests
         /// Case 1
         /// </summary>
         [Test]
-        public void EntryQuantityAndStopLossIsCorrectlyEstimatedWhenUsdISBaseCurrency()
+        public void EntryQuantityAndStopLossIsCorrectlyEstimatedWhenUsdIsBaseCurrency()
         {
             // Arrange
             var ticker = "EURUSD";
@@ -121,7 +120,7 @@ namespace QuantConnect.Tests
         /// </summary>
         [Test]
         [Ignore("The exchange rate isn't estimated yet.")]
-        public void EntryQuantityAndStopLossIsCorrectlyEstimatedWhenUsdIsNOTBaseCurrency()
+        public void EntryQuantityAndStopLossIsCorrectlyEstimatedWhenUsdIsNotBaseCurrency()
         {
             // Arrange
             var ticker = "USDJPY";

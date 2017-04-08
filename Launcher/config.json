@@ -23,7 +23,9 @@
   //"algorithm-location": "QuantConnect.Algorithm.Java.dll",
 
   // engine
+  //"data-folder": "../../../Data/",
   "data-folder": "D:\\AlgorithmicTrading\\DATA\\FOREX",
+
 
   // handlers
   "log-handler": "QuantConnect.Logging.CompositeLogHandler",

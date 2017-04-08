@@ -1,25 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using QuantConnect.Algorithm.CSharp.RiskManager;
 using QuantConnect.Data;
 using QuantConnect.Indicators;
 using QuantConnect.Orders;
 using QuantConnect.Orders.Fees;
 using QuantConnect.Orders.Fills;
+// ReSharper disable LoopCanBeConvertedToQuery
+// ReSharper disable PossibleInvalidOperationException
 
 namespace QuantConnect.Algorithm.CSharp
 {
     public class RiskManagerTestingAlgorithm : QCAlgorithm
     {
-        private readonly decimal _maxExposure = 0.8m;
-        private readonly decimal _maxExposurePerTrade = 0.3m;
-        private readonly decimal _riskPerTrade = 0.02m;
+        private const decimal MaxExposure = 0.8m;
+        private const decimal MaxExposurePerTrade = 0.3m;
+        private const decimal RiskPerTrade = 0.02m;
 
         private bool _runMarginTest = true;
 
-        private List<Identity> priceIndicators;
+        public List<Identity> PriceIndicators;
 
-        private FxRiskManagment RiskManager;
+        private FxRiskManagment _riskManager;
 
         public override void Initialize()
         {
@@ -31,7 +34,7 @@ namespace QuantConnect.Algorithm.CSharp
             var gbpResolution = LiveMode ? Resolution.Minute : Resolution.Daily;
             AddForex("GBPUSD", gbpResolution, "oanda", leverage: 20);
 
-            priceIndicators = new List<Identity>();
+            PriceIndicators = new List<Identity>();
 
             foreach (var pair in Securities.Keys)
             {
@@ -39,15 +42,14 @@ namespace QuantConnect.Algorithm.CSharp
                 Securities[pair].FillModel = new ImmediateFillModel();
                 var vol = 0.01m * (pair.Value == "USDJPY" ? 100 : 1);
                 Securities[pair].VolatilityModel = new ConstantVolatilityModel(vol);
-                priceIndicators.Add(Identity(pair));
+                PriceIndicators.Add(Identity(pair));
             }
-            RiskManager = new FxRiskManagment(Portfolio, _riskPerTrade, _maxExposurePerTrade, _maxExposure);
+            _riskManager = new FxRiskManagment(Portfolio, RiskPerTrade, MaxExposurePerTrade, MaxExposure);
         }
 
         public override void OnData(Slice slice)
         {
             Tuple<int, decimal> entryOrders;
-            decimal stopLossPrice;
 
             if (!LiveMode)
             {
@@ -62,7 +64,7 @@ namespace QuantConnect.Algorithm.CSharp
                 if (slice.Time.Day == 18)
                 {
                     // Test 1: if the used margin is bigger than the max exposure, then the entry order quantity must be zero.
-                    entryOrders = RiskManager.CalculateEntryOrders("EURUSD", EntryMarketDirection.GoLong);
+                    entryOrders = _riskManager.CalculateEntryOrders("EURUSD", EntryMarketDirection.GoLong);
                     if (entryOrders.Item1 != 0)
                     {
                         throw new Exception("The RiskManager allows operations beyond the max exposure.");
@@ -75,11 +77,12 @@ namespace QuantConnect.Algorithm.CSharp
 
                 #region Tests: Happy path.
 
+                decimal stopLossPrice;
                 if (slice.Time.Day == 19)
                 {
                     Portfolio.SetCash(10000m);
                     // Test 2: happy path with a long entry with USD as base currency.
-                    entryOrders = RiskManager.CalculateEntryOrders("EURUSD", EntryMarketDirection.GoLong);
+                    entryOrders = _riskManager.CalculateEntryOrders("EURUSD", EntryMarketDirection.GoLong);
                     stopLossPrice = slice["EURUSD"].Close - Securities["EURUSD"].VolatilityModel.Volatility;
                     if (entryOrders.Item1 != 20000 || entryOrders.Item2 != stopLossPrice)
                     {
@@ -89,7 +92,7 @@ namespace QuantConnect.Algorithm.CSharp
 
                     // Test 3: estimate a short entry orders with JPY as base currency.
 
-                    entryOrders = RiskManager.CalculateEntryOrders("USDJPY", EntryMarketDirection.GoShort);
+                    entryOrders = _riskManager.CalculateEntryOrders("USDJPY", EntryMarketDirection.GoShort);
                     stopLossPrice = slice["USDJPY"].Close + Securities["USDJPY"].VolatilityModel.Volatility;
                     if (entryOrders.Item1 != -19000 || entryOrders.Item2 != stopLossPrice)
                     {
@@ -104,7 +107,7 @@ namespace QuantConnect.Algorithm.CSharp
                 if (slice.Time.Day == 20)
                 {
                     // Test 4: estimate a new long entry order with USD as base currency.
-                    entryOrders = RiskManager.CalculateEntryOrders("EURUSD", EntryMarketDirection.GoLong);
+                    entryOrders = _riskManager.CalculateEntryOrders("EURUSD", EntryMarketDirection.GoLong);
                     stopLossPrice = slice["EURUSD"].Close - Securities["EURUSD"].VolatilityModel.Volatility;
                     if (entryOrders.Item1 != 21000 || entryOrders.Item2 != stopLossPrice)
                     {
@@ -122,7 +125,7 @@ namespace QuantConnect.Algorithm.CSharp
                 if (slice.Time.Day == 21)
                 {
                     // Test 5: update trailing orders
-                    RiskManager.UpdateTrailingStopOrders();
+                    _riskManager.UpdateTrailingStopOrders();
                     var tickets =
                         Transactions.GetOrderTickets(o => o.OrderType == OrderType.StopMarket &&
                                                           o.Status == OrderStatus.Submitted);
@@ -155,7 +158,7 @@ namespace QuantConnect.Algorithm.CSharp
             {
                 // Get the actual portfolio value
                 var marginPreOrder = Portfolio.MarginRemaining;
-                entryOrders = RiskManager.CalculateEntryOrders("GBPUSD", EntryMarketDirection.GoLong);
+                entryOrders = _riskManager.CalculateEntryOrders("GBPUSD", EntryMarketDirection.GoLong);
                 var orderQuantity = entryOrders.Item1;
                 var pairLeverage = Securities["GBPUSD"].Leverage;
                 var pairRate = Securities["GBPUSD"].Price;

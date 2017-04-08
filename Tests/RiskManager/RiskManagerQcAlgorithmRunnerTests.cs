@@ -1,9 +1,4 @@
 ﻿using NUnit.Framework;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace QuantConnect.Tests.RiskManager
 {
@@ -15,9 +10,10 @@ namespace QuantConnect.Tests.RiskManager
         {
             // Arrange
             string[] testsNames = { "IfUsedMarginIsAboveMaxExposureThenQuantityIsZero",
-                                    "EntryQuantityAndStopLossIsCorrectlyEstimatedWhenUsdISBaseCurrency",
-                                    "EntryQuantityAndStopLossIsCorrectlyEstimatedWhenUsdIsNOTBaseCurrency",
-                                    "MaxEposurePerTradeIsObserved"};
+                                    "EntryQuantityAndStopLossIsCorrectlyEstimatedWhenUsdIsBaseCurrency",
+                                    "EntryQuantityAndStopLossIsCorrectlyEstimatedWhenUsdIsNotBaseCurrency",
+                                    "MaxEposurePerTradeIsObserved",
+                                    "MaxRiskPerTradeIsLimitedByAnAmountOfMoney"};
 
             // Act and Assert 
             foreach (var test in testsNames)
