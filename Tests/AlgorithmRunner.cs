@@ -38,10 +38,32 @@ namespace QuantConnect.Tests
 
         public static void RunLocalBacktest(string algorithm, Dictionary<string, string> expectedStatistics, Language language)
         {
-            var statistics = new Dictionary<string, string>();
-
             Composer.Instance.Reset();
+            var backtestingResultHandler = RunAlgorithm(algorithm, language);
 
+            var statistics = backtestingResultHandler.FinalStatistics;
+            foreach (var stat in expectedStatistics)
+            {
+                Assert.AreEqual(true, statistics.ContainsKey(stat.Key), "Missing key: " + stat.Key);
+                Assert.AreEqual(stat.Value, statistics[stat.Key], "Failed on " + stat.Key);
+            }
+        }
+
+        public static void RunLocalBacktest(string algorithm)
+        {
+            Composer.Instance.Reset();
+            var backtestingResultHandler = RunAlgorithm(algorithm);
+            var testsResults = backtestingResultHandler.Algorithm.RuntimeStatistics;
+
+            foreach (var test in testsResults.Keys)
+            {
+                Assert.IsTrue(bool.Parse(testsResults[test]), test);
+            }
+        }
+
+        private static BacktestingResultHandler RunAlgorithm(string algorithm, Language language = Language.CSharp)
+        {
+            BacktestingResultHandler backtestingResultHandler = null;
             try
             {
                 // set the configuration up
@@ -72,15 +94,14 @@ namespace QuantConnect.Tests
 
                     var engine = new Lean.Engine.Engine(systemHandlers, algorithmHandlers, false);
                     Task.Factory.StartNew(() =>
-                    {
-                        string algorithmPath;
-                        var job = systemHandlers.JobQueue.NextJob(out algorithmPath);
-                        engine.Run(job, algorithmPath);
-                    }).Wait();
+                        {
+                            string algorithmPath;
+                            var job = systemHandlers.JobQueue.NextJob(out algorithmPath);
+                            engine.Run(job, algorithmPath);
+                        })
+                        .Wait();
 
-                    var backtestingResultHandler = (BacktestingResultHandler)algorithmHandlers.Results;
-                    statistics = backtestingResultHandler.FinalStatistics;
-                    
+                    backtestingResultHandler = (BacktestingResultHandler) algorithmHandlers.Results;
                     Log.DebuggingEnabled = debugEnabled;
                 }
             }
@@ -88,12 +109,7 @@ namespace QuantConnect.Tests
             {
                 Log.LogHandler.Error("{0} {1}", ex.Message, ex.StackTrace);
             }
-
-            foreach (var stat in expectedStatistics)
-            {
-                Assert.AreEqual(true, statistics.ContainsKey(stat.Key), "Missing key: " + stat.Key);
-                Assert.AreEqual(stat.Value, statistics[stat.Key], "Failed on " + stat.Key);
-            }
+            return backtestingResultHandler;
         }
     }
 }
