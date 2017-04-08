@@ -1,9 +1,9 @@
-﻿using QuantConnect.Orders;
-using QuantConnect.Securities;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using QuantConnect.Orders;
+using QuantConnect.Securities;
 
-namespace QuantConnect.Algorithm.CSharp
+namespace QuantConnect.Algorithm.CSharp.RiskManager
 {
     public enum EntryMarketDirection
     {
@@ -77,7 +77,7 @@ namespace QuantConnect.Algorithm.CSharp
         /// <param name="pair">The Forex pair Symbol.</param>
         /// <param name="action">The order direction.</param>
         /// <returns>a Tuple with the quantity as Item1 and the stop-loss price as Item2. If quantity is zero, then means that no trade must be done.</returns>
-        public Tuple<int, decimal> CalculateEntryOrders(Symbol pair, EntryMarketDirection action)
+        public Tuple<int, decimal> CalculateEntryOrders(Symbol pair, EntryMarketDirection action, decimal? maxMoneyAtRisk = null)
         {
             // If exposure is greater than the max exposure, then return zero.
             if (_portfolio.TotalMarginUsed > _portfolio.TotalPortfolioValue * _maxExposure)
@@ -96,6 +96,11 @@ namespace QuantConnect.Algorithm.CSharp
 
                 // Estimate the maximum entry order quantity given the risk per trade.
                 var moneyAtRisk = _portfolio.TotalPortfolioValue * _riskPerTrade;
+                if (maxMoneyAtRisk != null)
+                {
+                    moneyAtRisk = Math.Min(moneyAtRisk, (decimal)maxMoneyAtRisk);
+                }
+
                 var maxQuantitybyRisk = moneyAtRisk / (volatility * exchangeRate);
                 // Estimate the maximum entry order quantity given the exposure per trade.
                 var maxBuySize = Math.Min(_portfolio.MarginRemaining, _portfolio.TotalPortfolioValue * _maxExposurePerTrade) * leverage;

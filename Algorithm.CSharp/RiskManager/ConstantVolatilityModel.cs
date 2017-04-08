@@ -1,29 +1,19 @@
-﻿using QuantConnect.Data;
-using QuantConnect.Securities;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using QuantConnect.Data;
+using QuantConnect.Securities;
 
-namespace QuantConnect.Algorithm.CSharp
+namespace QuantConnect.Algorithm.CSharp.RiskManager
 {
     public class ConstantVolatilityModel : IVolatilityModel
     {
-        private decimal volatility;
-
         public ConstantVolatilityModel(decimal v)
         {
-            this.volatility = v;
+            this.Volatility = v;
         }
 
-        public decimal Volatility
-        {
-            get
-            {
-                return volatility;
-            }
-        }
+        public decimal Volatility { get; private set; }
 
         public IEnumerable<HistoryRequest> GetHistoryRequirements(Security security, DateTime utcTime)
         {
