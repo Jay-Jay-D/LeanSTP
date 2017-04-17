@@ -3,7 +3,6 @@ using QuantConnect.Data;
 using QuantConnect.Orders.Fees;
 using QuantConnect.Orders.Fills;
 
-
 namespace QuantConnect.Algorithm.CSharp
 {
     public abstract class RiskManagetTestsBaseAlgorithm : QCAlgorithm
@@ -19,8 +18,8 @@ namespace QuantConnect.Algorithm.CSharp
             SetStartDate(2008, 11, 17); //Set Start Date
             SetEndDate(2008, 11, 28); //Set End Date
             SetCash(10000); //Set Strategy Cash
-            AddForex("USDJPY", Resolution.Daily, market: "oanda", leverage: 10);
-            AddForex("EURUSD", Resolution.Daily, market: "oanda", leverage: 10);
+            AddForex("USDJPY", Resolution.Daily, "oanda", leverage: 10);
+            AddForex("EURUSD", Resolution.Daily, "oanda", leverage: 10);
 
             foreach (var pair in Securities.Keys)
             {
@@ -39,9 +38,7 @@ namespace QuantConnect.Algorithm.CSharp
         {
             // Arrange
             if (slice.Time.Day == 17)
-            {
                 MarketOrder("EURUSD", 65000);
-            }
             // Act
             if (slice.Time.Day == 18)
             {
@@ -121,7 +118,7 @@ namespace QuantConnect.Algorithm.CSharp
             if (slice.Time.Day == 19)
             {
                 var entryOrders =
-                    RiskManager.CalculateEntryOrders(ticker, EntryMarketDirection.GoLong, maxMoneyAtRisk: 100m);
+                    RiskManager.CalculateEntryOrders(ticker, EntryMarketDirection.GoLong, 100m);
                 var stopLossPrice = slice[ticker].Close - Securities[ticker].VolatilityModel.Volatility;
                 var isQuantityEstimatedCorrectly = entryOrders.Item1 == 10000;
                 var isStopLossEstimatedCorrectly = entryOrders.Item2 == stopLossPrice;
