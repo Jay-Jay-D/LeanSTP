@@ -15,15 +15,15 @@ namespace QuantConnect.Lean.LeanSTP
         private static AppDomainSetup _ads;
         private SmartThreadPool _smartThreadPool;
         Thread _workGeneratorThread;
-        Queue<object[]> _runGenomeTesterArgs;
+        Queue<object[]> _runsArgs;
 
         object _lock = new object();
         int _worksToRun;
 
         public LeanSTP(string algorithm, string outputFolder)
         {
-            _runGenomeTesterArgs = GenerateTesterArguments(algorithm, outputFolder);
-            _worksToRun = _runGenomeTesterArgs.Count;
+            _runsArgs = GenerateRunsArguments(algorithm, outputFolder);
+            _worksToRun = _runsArgs.Count;
             _exeAssembly = Assembly.GetEntryAssembly().FullName;
             _ads = SetupAppDomain();
 
@@ -54,12 +54,12 @@ namespace QuantConnect.Lean.LeanSTP
         }
 
         /// <summary>
-        /// Generates the genome tester arguments. That is the path for all genomes with the risk
-        /// manager enabled and the combinations of trailing orders and ma cross.
+        /// Generates the different runs arguments. 
         /// </summary>
+        /// <param name="algorithm">The selected Algorithm</param>
         /// <param name="trainingSessionPath">The training session path.</param>
         /// <returns></returns>
-        private static Queue<object[]> GenerateTesterArguments(string algorithm, string trainingSessionPath)
+        private static Queue<object[]> GenerateRunsArguments(string algorithm, string trainingSessionPath)
         {
             int[] fastMaPeriods = { 10, 20 };
             int[] slowMaPeriods = { 60, 120};
@@ -93,10 +93,9 @@ namespace QuantConnect.Lean.LeanSTP
             object[] args = null;
             lock (_lock)
             {
-                args = _runGenomeTesterArgs.Dequeue();
+                args = _runsArgs.Dequeue();
             }
             leanWorker.RunAlgorithm(args);
-            //leanWorker.RunGenomeTester((string)args[0], (string)args[1], (string)args[2], (string)args[3]);
             AppDomain.Unload(ad);
             return null;
         }
