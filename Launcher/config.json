@@ -10,7 +10,8 @@
 
   // algorithm class selector
   //"algorithm-type-name": "BasicTemplateAlgorithm",
-  "algorithm-type-name": "RiskManagerTestingAlgorithm",
+  "algorithm-type-name": "BasicTemplateForexAlgorithm",
+  //"algorithm-type-name": "RiskManagerTestingAlgorithm",
 
   // Algorithm language selector - options CSharp, FSharp, VisualBasic, Python, Java
   "algorithm-language": "CSharp",
@@ -94,7 +95,7 @@
   "fxcm-account-id": "",
 
   // iqfeed configuration
-  "iqfeed-username": "",
+  "iqfeed-username": "", 
   "iqfeed-password": "",
   "iqfeed-productName": "",
   "iqfeed-version": "1.0",
