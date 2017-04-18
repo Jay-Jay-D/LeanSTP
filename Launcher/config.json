@@ -10,7 +10,7 @@
 
   // algorithm class selector
   //"algorithm-type-name": "BasicTemplateAlgorithm",
-  "algorithm-type-name": "BasicTemplateForexAlgorithm",
+  "algorithm-type-name": "TimeSeriesMomentumEffect",
   //"algorithm-type-name": "RiskManagerTestingAlgorithm",
 
   // Algorithm language selector - options CSharp, FSharp, VisualBasic, Python, Java
@@ -40,7 +40,8 @@
   "command-json-file": "command.json",
   "map-file-provider": "QuantConnect.Data.Auxiliary.LocalDiskMapFileProvider",
   "factor-file-provider": "QuantConnect.Data.Auxiliary.LocalDiskFactorFileProvider",
-  "data-provider": "QuantConnect.Lean.Engine.DataFeeds.DefaultDataProvider",
+  //"data-provider": "QuantConnect.Lean.Engine.DataFeeds.DefaultDataProvider",
+  "data-provider": "QuantConnect.Lean.Engine.DataFeeds.ApiDataProvider",
 
   // limits on number of symbols to allow
   "symbol-minute-limit": 10000,
@@ -55,8 +56,8 @@
   "transaction-log": "",
 
   // To get your api access token go to quantconnect.com/account
-  "job-user-id": "0",
-  "api-access-token": "",
+  "job-user-id": "9081",
+  "api-access-token": "3a92e667007afade2eabad3d66356a16",
 
   // live data configuration
   "live-data-url": "ws://www.quantconnect.com/api/v2/live/data/",
@@ -95,14 +96,14 @@
   "fxcm-account-id": "",
 
   // iqfeed configuration
-  "iqfeed-username": "", 
+  "iqfeed-username": "",
   "iqfeed-password": "",
   "iqfeed-productName": "",
   "iqfeed-version": "1.0",
 
   // Required to access data from Quandl
   // To get your access token go to https://www.quandl.com/account/api
-  "quandl-auth-token": "",
+  "quandl-auth-token": "y9ABkCUxusF8zSG68Set",
 
   // parameters to set in the algorithm (the below are just samples)
   "parameters": {
