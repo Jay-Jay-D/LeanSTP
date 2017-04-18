@@ -74,6 +74,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="QCForumAlgorithms\TimeSeriesMomentumEffect.cs" />
     <Compile Include="QCUExamples\AddRemoveSecurityRegressionAlgorithm.cs" />
     <Compile Include="QCUExamples\BasicTemplateDailyAlgorithm.cs" />
     <Compile Include="QCUExamples\FuturesMomentumAlgorithm.cs" />
