@@ -134,6 +134,7 @@
     <Compile Include="QCUExamples\DropboxUniverseSelectionAlgorithm.cs" />
     <Compile Include="QCUExamples\ParameterizedAlgorithm.cs" />
     <Compile Include="RiskManager\ConstantVolatilityModel.cs" />
+    <Compile Include="RiskManager\EntryMarketDirection.cs" />
     <Compile Include="RiskManager\FxRiskManagment.cs" />
     <Compile Include="RiskManager\RiskManagerTestingAlgorithm.cs" />
     <Compile Include="RiskManager\RiskManagerTestingAlgorithms.cs" />
