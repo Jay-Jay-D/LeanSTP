@@ -161,6 +161,7 @@
     <Compile Include="QCUExamples\UpdateOrderRegressionAlgorithm.cs" />
     <Compile Include="QCUExamples\OrderTicketDemoAlgorithm.cs" />
     <Compile Include="QCUExamples\WeeklyUniverseSelectionRegressionAlgorithm.cs" />
+    <Compile Include="TermStructureEffectinCommodities.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Algorithm\QuantConnect.Algorithm.csproj">
