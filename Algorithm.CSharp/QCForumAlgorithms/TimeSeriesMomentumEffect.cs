@@ -5,6 +5,7 @@ using QuantConnect.Brokerages;
 using QuantConnect.Data;
 using QuantConnect.Data.Custom;
 using QuantConnect.Indicators;
+using QuantConnect.Parameters;
 using QuantConnect.Securities;
 
 namespace QuantConnect.Algorithm.CSharp
@@ -13,33 +14,27 @@ namespace QuantConnect.Algorithm.CSharp
     ///     Every month, the investor considers whether the excess return of each asset over the past 12
     ///     months is positive or negative and goes long on the contract if it is positive and short if
     ///     negative. The position size is set to be inversely proportional to the instrument’s volatility.
+    ///     Source: http://quantpedia.com/Screener/Details/118
     /// </summary>
     /// <seealso cref="QuantConnect.Algorithm.QCAlgorithm" />
     public class TimeSeriesMomentumEffect : QCAlgorithm
     {
-        // The Generally the 10 year maturity is used as a proxy of the risk free rate.
-        private const string riskFreeReturnQuandlCode = "USTREASURY/YIELD";
+        #region Investment Universe
 
-        private const int forexLeverage = 20;
-        private const string forexMarket = "oanda"; // "fxcm"
-        private const int volatilityWindow = 90;
-        private readonly Dictionary<Symbol, decimal> excessReturns = new Dictionary<Symbol, decimal>();
+        /*
+         The investment universe consists of:
+            - 22 commodity futures
+            - 12 cross-currency pairs (with 9 underlying currencies)
+            - 9 developed equity indexes
+            - 4 developed government bond futures. 
+        */
 
-        private readonly string[] forexTickers =
+        private readonly string[] comoditiesFuturesTickers =
         {
-            "EURUSD", "USDJPY", "USDCHF", "GBPUSD", "USDCAD", "AUDUSD"
-        };
-
-        // The full list of Futures can be found in Table 1
-        // at http://pages.stern.nyu.edu/~lpederse/papers/TimeSeriesMomentum.pdf
-        // Here I'll use only commodities already listed in the Futures Class.
-
-        private readonly string[] futuresTickers =
-        {
-            // Commodities available data.
             Futures.Metals.Gold,
             Futures.Metals.Platinum,
             Futures.Metals.Silver,
+            Futures.Metals.Palladium,
             Futures.Energies.CrudeOilWTI,
             Futures.Energies.HeatingOil,
             Futures.Energies.Gasoline,
@@ -49,37 +44,91 @@ namespace QuantConnect.Algorithm.CSharp
             Futures.Grains.SoybeanMeal,
             Futures.Grains.SoybeanOil,
             Futures.Grains.Wheat,
-            Futures.Indices.SP500EMini,
+            Futures.Grains.Oats,
             Futures.Meats.LeanHogs,
+            Futures.Meats.LiveCattle,
             Futures.Meats.FeederCattle,
+            Futures.Softs.OrangeJuice,
             Futures.Softs.Cocoa,
             Futures.Softs.Coffee,
             Futures.Softs.Cotton2,
             Futures.Softs.Sugar11
         };
 
+        private readonly string[] forexTickers =
+        {
+            "EURUSD", "USDJPY", "USDCHF", "GBPUSD", "USDCAD", "AUDUSD",
+            "USDCNH", "NZDUSD", "EURJPY", "EURCHF", "EURGBP", "GBPJPY",
+        };
+
+        private readonly string[] cfdTickers =
+        {
+            "AU200AUD",  // Australia 200 - Australian Dollar
+            "DE30EUR",   // Germany 30 - Euro Dollar
+            "EU50EUR",   // Europe 50 - Euro Dollar
+            "CH20CHF",   // Swiss 20 - Swiss Frank
+            "FR40EUR",   // France 40 - Euro Dollar
+            "HK33HK",    // Hong Kong 33 - Hk Dollar
+            "JP225USD",  // Japan 225 - Us Dollar
+            "UK100GBP",  // Uk 100 - English Pound
+            "SPX500USD", // S&p 500 - Us Dollar
+        };
+
+        private readonly string[] bondsFuturesTickers =
+        {
+            "SCF/CME_TU1_ON",       // CBOT 2-year US Treasury Note Futures
+            "SCF/CME_FV1_ON",       // CBOT 5-year US Treasury Note Futures
+            "SCF/CME_TY1_ON",       // CBOT 10-year US Treasury Note Futures
+            "SCF/CME_US2_ON",       // CBOT 30-year US Treasury Bond Futures
+            "SCF/EUREX_FGBL2_EN",   // EUREX Euro-Bund Futures (German debt security)
+            "SCF/EUREX_FBTP2_EN",   // EUREX Euro-BTP Futures (Italian debt security)
+            "SCF/EUREX_FOAT2_EN",   // EUREX Euro-OAT Futures (French debt security)
+        };
+
+        #endregion
+
+        [Parameter("broker")]
+        private string forexMarket = "fxcm";
+        private string cfdMarket = "oanda";
+
+
+        private const int cfdLeverage = 10;
+        private const int forexLeverage = 20;
+
+        // The 10 year maturity is used as a proxy of the risk free rate.
+        private const string riskFreeReturnQuandlCode = "USTREASURY/YIELD";
+
+        // "fxcm"
+        private const int volatilityWindow = 90;
+
+        private readonly Dictionary<Symbol, decimal> excessReturns = new Dictionary<Symbol, decimal>();
+
+
+        // The full list of Futures can be found in Table 1
+        // at http://pages.stern.nyu.edu/~lpederse/papers/TimeSeriesMomentum.pdf
+        // Here I'll use only commodities already listed in the Futures Class.
+
+
         private readonly List<Symbol> symbols = new List<Symbol>();
-        private DateTime LastTradableDayInMonth;
 
-        private bool rebalancePortfolio;
-
+        private bool liquidateAllPositions;
+        private bool monthlyRebalance;
 
         private decimal riskFreeRetun;
 
         public override void Initialize()
         {
             // Set the basic algorithm parameters.
-            SetStartDate(2008, 01, 01);
+            SetStartDate(2008, 06, 01);
             SetEndDate(2017, 03, 30);
             SetCash(100000);
 
-            BrokerageName brokerage;
-            Enum.TryParse(forexMarket, out brokerage);
+            var brokerage = forexMarket == "fxcm" ? BrokerageName.FxcmBrokerage : BrokerageName.OandaBrokerage;
             SetBrokerageModel(brokerage);
 
             AddData<QuandlUSTeasuryYield>(riskFreeReturnQuandlCode, Resolution.Daily);
 
-            //foreach (var ticker in futuresTickers)
+            //foreach (var ticker in comoditiesFuturesTickers)
             //    symbols.Add(AddFuture(ticker, Resolution.Daily).Symbol);
 
             foreach (var ticker in forexTickers)
@@ -93,16 +142,56 @@ namespace QuantConnect.Algorithm.CSharp
                             .Over(SMA(forex.Symbol, volatilityWindow, Resolution.Daily)));
             }
 
-            Schedule.On(DateRules.MonthStart(), TimeRules.At(0, 0), GetLastTradableDayInMonth);
+            Schedule.On(DateRules.MonthStart(), TimeRules.At(0, 0), () =>
+            {
+                UpdateAssetsReturns();
+                liquidateAllPositions = true;
+            });
 
             SetWarmUp(TimeSpan.FromDays(volatilityWindow));
         }
 
+        public override void OnData(Slice slice)
+        {
+            if (IsWarmingUp) return;
+
+            if (liquidateAllPositions)
+            {
+                // Liquidate all existing holdings.
+                Liquidate();
+                liquidateAllPositions = false;
+                monthlyRebalance = true;
+            }
+
+            if (monthlyRebalance && !Portfolio.Invested)
+            {
+                var assetsToLong = excessReturns.Where(s => s.Value > 0m)
+                    .ToDictionary(pair => pair.Key,
+                        pair => Securities[pair.Key].VolatilityModel.Volatility);
+                var assetsToShort = excessReturns.Where(s => s.Value < 0m)
+                    .ToDictionary(pair => pair.Key,
+                        pair => Securities[pair.Key].VolatilityModel.Volatility);
+
+                var divisor = assetsToLong.Values.Sum();
+                foreach (var keyValuePair in assetsToLong)
+                    SetHoldings(keyValuePair.Key, keyValuePair.Value / divisor);
+
+                divisor = assetsToShort.Values.Sum();
+                foreach (var keyValuePair in assetsToShort)
+                    SetHoldings(keyValuePair.Key, -keyValuePair.Value / divisor);
+
+                monthlyRebalance = false;
+            }
+        }
+
+        public void OnData(Quandl data)
+        {
+            riskFreeRetun = data.Price;
+        }
+
         private void UpdateAssetsReturns()
         {
-            var requestDay = Time.Day;
-            if (DateTime.IsLeapYear(Time.Year) && Time.Month == 2) requestDay--;
-            var dateRequest = new DateTime(Time.Year - 1, Time.Month, requestDay);
+            var dateRequest = new DateTime(Time.Year - 1, Time.Month, Time.Day);
             // I ask for some days before just in case the selected day hasn't historical prices record.
             var history = History(symbols, dateRequest.AddDays(-5), dateRequest.AddDays(1), Resolution.Daily);
             foreach (var symbol in symbols)
@@ -112,66 +201,11 @@ namespace QuantConnect.Algorithm.CSharp
                     excessReturns[symbol] = (Securities[symbol].Price / slice[symbol].Price - 1m) * 100m -
                                             riskFreeRetun;
                 }
-                catch (Exception ex)
+                catch (Exception e)
                 {
-                    Console.WriteLine(symbol.Value, " hasn't data to estimate excess returns.");
+                    Console.WriteLine(symbol, " hasn't data to estimate excess returns.");
                     excessReturns[symbol] = 0m;
                 }
-        }
-
-        private void GetLastTradableDayInMonth()
-        {
-            var lastDayinMonth = new DateTime(Time.Year, Time.Month, DateTime.DaysInMonth(Time.Year, Time.Month));
-            switch (lastDayinMonth.DayOfWeek)
-            {
-                case DayOfWeek.Saturday:
-                    lastDayinMonth = lastDayinMonth.AddDays(-1);
-                    break;
-                case DayOfWeek.Sunday:
-                    lastDayinMonth = lastDayinMonth.AddDays(-2);
-                    break;
-            }
-            LastTradableDayInMonth = lastDayinMonth;
-        }
-
-        public override void OnData(Slice slice)
-        {
-            if (IsWarmingUp) return;
-
-            // Check if today is the month last day
-            if (Time.Date == LastTradableDayInMonth)
-            {
-                // Liquidate all existing holdings.
-                Liquidate();
-                UpdateAssetsReturns();
-                rebalancePortfolio = true;
-                return;
-            }
-
-            if (rebalancePortfolio)
-            {
-                var assetsToLong = excessReturns.Where(s => s.Value > 0m)
-                    .ToDictionary(pair => pair.Key,
-                        pair => Securities[pair.Key].VolatilityModel.Volatility);
-                var assetsToShort = excessReturns.Where(s => s.Value < 0m)
-                    .ToDictionary(pair => pair.Key,
-                        pair => Securities[pair.Key].VolatilityModel.Volatility);
-
-
-                var divisor = assetsToLong.Values.Sum();
-                foreach (var keyValuePair in assetsToLong)
-                    SetHoldings(keyValuePair.Key, keyValuePair.Value / divisor);
-
-                divisor = assetsToShort.Values.Sum();
-                foreach (var keyValuePair in assetsToShort)
-                    SetHoldings(keyValuePair.Key, -keyValuePair.Value / divisor);
-                rebalancePortfolio = false;
-            }
-        }
-
-        public void OnData(Quandl data)
-        {
-            riskFreeRetun = data.Price;
         }
     }
 
