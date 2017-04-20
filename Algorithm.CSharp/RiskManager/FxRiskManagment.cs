@@ -5,12 +5,6 @@ using QuantConnect.Securities;
 
 namespace QuantConnect.Algorithm.CSharp.RiskManager
 {
-    public enum EntryMarketDirection
-    {
-        GoShort  = -1,
-        DoNothing = 0,
-        GoLong = 1
-    }
 
     public enum LotSize
     {
