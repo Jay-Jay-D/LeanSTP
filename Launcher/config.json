@@ -10,7 +10,7 @@
 
   // algorithm class selector
   //"algorithm-type-name": "BasicTemplateAlgorithm",
-  "algorithm-type-name": "TimeSeriesMomentumEffect",
+  "algorithm-type-name": "ForexDataDownloader",
   //"algorithm-type-name": "RiskManagerTestingAlgorithm",
 
   // Algorithm language selector - options CSharp, FSharp, VisualBasic, Python, Java
@@ -25,6 +25,7 @@
 
   // engine
   "data-folder": "../../../Data/",
+  //"data-folder": "D:\\AlgorithmicTrading\\DATA\\FOREX",
 
 
   // handlers
@@ -102,12 +103,13 @@
 
   // Required to access data from Quandl
   // To get your access token go to https://www.quandl.com/account/api
-  "quandl-auth-token": " y9ABkCUxusF8zSG68Set",
+  "quandl-auth-token": "y9ABkCUxusF8zSG68Set",
 
   // parameters to set in the algorithm (the below are just samples)
   "parameters": {
     "ema-fast": 10,
-    "ema-slow": 20
+    "ema-slow": 20,
+    "forex-broker": "fxcm"
   },
 
   "environments": {

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using NUnit.Framework;
+using QuantConnect.Algorithm.CSharp;
 using QuantConnect.Algorithm.CSharp.RiskManager;
 using QuantConnect.Data;
 using QuantConnect.Data.Market;

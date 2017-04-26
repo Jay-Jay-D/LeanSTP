@@ -26,7 +26,7 @@ namespace QuantConnect.Algorithm.CSharp
         private readonly string cfdMarket = "oanda";
 
         private const int cfdLeverage = 10;
-        private const int forexLeverage = 20;
+        private const decimal forexLeverage = 20m;
 
         private const int volatilityWindow = 30;
 
@@ -108,14 +108,15 @@ namespace QuantConnect.Algorithm.CSharp
         private readonly List<Symbol> symbols = new List<Symbol>();
         private readonly Dictionary<Symbol, decimal> excessReturns = new Dictionary<Symbol, decimal>();
 
-        private Dictionary<SecurityType, decimal> portfolioShareToAssetType = new Dictionary<SecurityType, decimal>();
+        private readonly Dictionary<SecurityType, decimal> portfolioShareToAssetType =
+            new Dictionary<SecurityType, decimal>();
+
         private bool liquidateAllPositions;
         private bool monthlyRebalance;
 
         private decimal riskFreeRetun;
 
         #endregion
-
 
         #region QCAlgorithm Methods
 
@@ -143,12 +144,6 @@ namespace QuantConnect.Algorithm.CSharp
                 symbols.Add(security.Symbol);
             }
 
-            //foreach (var ticker in bondsFuturesTickers)
-            //{
-            //    AddData<QuandlBondFutures>(ticker, Resolution.Daily);
-            //    symbols.Add(ticker);
-            //}
-
             foreach (var symbol in symbols)
             {
                 // Given the big diversity in currencies and prices,, variance can't be used as volatility proxy because the values will not be comparable.
@@ -160,6 +155,7 @@ namespace QuantConnect.Algorithm.CSharp
                 if (!portfolioShareToAssetType.ContainsKey(symbol.SecurityType))
                     portfolioShareToAssetType[symbol.SecurityType] = 1;
             }
+
 
             /*
             foreach (var ticker in comoditiesFuturesTickers)
@@ -195,26 +191,18 @@ namespace QuantConnect.Algorithm.CSharp
 
             if (monthlyRebalance && !Portfolio.Invested)
             {
-                /*
-                var assetsToLong = excessReturns.Where(s => s.Value > 0m)
-                    .ToDictionary(pair => pair.Key,
-                        pair => Securities[pair.Key].VolatilityModel.Volatility);
-                var assetsToShort = excessReturns.Where(s => s.Value < 0m)
-                    .ToDictionary(pair => pair.Key,
-                        pair => Securities[pair.Key].VolatilityModel.Volatility);
-
-                var divisor = assetsToLong.Values.Sum();
-                foreach (var keyValuePair in assetsToLong)
-                    SetHoldings(keyValuePair.Key, keyValuePair.Value / divisor);
-
-                divisor = assetsToShort.Values.Sum();
-                foreach (var keyValuePair in assetsToShort)
-                    SetHoldings(keyValuePair.Key, -keyValuePair.Value / divisor);
-                */
                 var newOrders = EstimateNewOrders();
                 foreach (var order in newOrders)
                 {
-                    SetHoldings(order.Symbol, order.TargetHolding);
+                    var unitValue = new MarketOrder(order.Symbol, 1, Time).GetValue(Securities[order.Symbol]);
+                    if (unitValue == 0) continue;
+                    var orderValue = Portfolio.TotalPortfolioValue * order.TargetHolding;
+                    var quantity = (int) (orderValue / unitValue);
+                    if (quantity != 0)
+                    {
+                        MarketOrder(order.Symbol, quantity);
+                    }
+                    //SetHoldings(order.Symbol, order.TargetHolding);
                 }
                 monthlyRebalance = false;
             }
@@ -225,6 +213,8 @@ namespace QuantConnect.Algorithm.CSharp
             riskFreeRetun = data.Price;
         }
 
+        #endregion
+
         #region Auxiliary Methods
 
         private List<SecuritiesOrders> EstimateNewOrders()
@@ -232,19 +222,20 @@ namespace QuantConnect.Algorithm.CSharp
             var orders = new List<SecuritiesOrders>();
 
             var volatilitySumByAsset = from s in symbols
-                                       group s by s.SecurityType
-                                       into grouped
-                                       select new
-                                       {
-                                           AssetType = grouped.Key,
-                                           VolatilitySum = grouped.Sum(s => Securities[s].VolatilityModel.Volatility)
-                                       };
+                group s by s.SecurityType
+                into grouped
+                select new
+                {
+                    AssetType = grouped.Key,
+                    VolatilitySum = grouped.Sum(s => Securities[s].VolatilityModel.Volatility)
+                };
 
             foreach (var symbol in symbols)
             {
                 var volatility = Securities[symbol].VolatilityModel.Volatility;
-                var weightedVolatility = volatility / volatilitySumByAsset.First(v => v.AssetType == symbol.SecurityType)
-                                                                          .VolatilitySum;
+                var weightedVolatility = volatility / volatilitySumByAsset
+                                             .First(v => v.AssetType == symbol.SecurityType)
+                                             .VolatilitySum;
                 var leverage = Securities[symbol].Leverage;
                 var portfolioShareAsAsset = portfolioShareToAssetType[symbol.SecurityType];
                 var orderDirection = Math.Sign(excessReturns[symbol]);
@@ -253,12 +244,11 @@ namespace QuantConnect.Algorithm.CSharp
                 orders.Add(new SecuritiesOrders
                 {
                     Symbol = symbol,
-                    Direction = (EntryMarketDirection)orderDirection,
+                    Direction = (EntryMarketDirection) orderDirection,
                     TargetHolding = targetHoldings
                 });
             }
             return orders;
-
         }
 
         private void UpdateAssetsReturns()
@@ -281,31 +271,5 @@ namespace QuantConnect.Algorithm.CSharp
         }
 
         #endregion
-
-        #endregion
-    }
-
-    public struct SecuritiesOrders
-    {
-        public Symbol Symbol;
-        public EntryMarketDirection Direction;
-        public decimal TargetHolding;
-    }
-
-    public class QuandlBondFutures : Quandl
-    {
-        public QuandlBondFutures()
-            : base("Settle")
-        {
-        }
-    }
-
-
-    public class QuandlUSTeasuryYield : Quandl
-    {
-        public QuandlUSTeasuryYield()
-            : base("10 YR")
-        {
-        }
     }
 }

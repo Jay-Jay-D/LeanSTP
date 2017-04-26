@@ -72,6 +72,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="QCForumAlgorithms\CrossingMovingAverages.cs" />
+    <Compile Include="QCForumAlgorithms\ForexVanillaMomentum.cs" />
+    <Compile Include="QCForumAlgorithms\HullMA.cs" />
+    <Compile Include="QCForumAlgorithms\QuandlBondFutures.cs" />
+    <Compile Include="QCForumAlgorithms\QuandlUSTeasuryYield.cs" />
+    <Compile Include="QCForumAlgorithms\SecuritiesOrders.cs" />
+    <Compile Include="QCForumAlgorithms\SmaSarStrategy.cs" />
+    <Compile Include="QCForumAlgorithms\TermStructureEffectinCommodities.cs" />
+    <Compile Include="QCForumAlgorithms\RolloverTest.cs" />
     <Compile Include="QCForumAlgorithms\TimeSeriesMomentumEffect.cs" />
     <Compile Include="QCUExamples\AddRemoveSecurityRegressionAlgorithm.cs" />
     <Compile Include="QCUExamples\BasicTemplateDailyAlgorithm.cs" />
@@ -96,7 +105,7 @@
     <Compile Include="QCUExamples\OptionSplitRegressionAlgorithm.cs" />
     <Compile Include="QCUExamples\PortfolioOptimizationNumericsAlgorithm.cs" />
     <Compile Include="QCUExamples\DailyFxAlgorithm.cs" />
-    <Compile Include="QCUExamples\BasicTemplateForexAlgorithm.cs" />
+    <Compile Include="QCUExamples\ForexDataDownloader.cs" />
     <Compile Include="QCUExamples\BasicTemplateAlgorithm.cs" />
     <Compile Include="QCUExamples\BasicTemplateOptionsAlgorithm.cs" />
     <Compile Include="Benchmarks\EmptyMinute400EquityAlgorithm.cs" />
