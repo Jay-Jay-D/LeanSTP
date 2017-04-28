@@ -79,6 +79,7 @@
     <Compile Include="QCForumAlgorithms\QuandlUSTeasuryYield.cs" />
     <Compile Include="QCForumAlgorithms\SecuritiesOrders.cs" />
     <Compile Include="QCForumAlgorithms\SmaSarStrategy.cs" />
+    <Compile Include="QCForumAlgorithms\TailRatioPseudoCode.cs" />
     <Compile Include="QCForumAlgorithms\TermStructureEffectinCommodities.cs" />
     <Compile Include="QCForumAlgorithms\RolloverTest.cs" />
     <Compile Include="QCForumAlgorithms\TimeSeriesMomentumEffect.cs" />
