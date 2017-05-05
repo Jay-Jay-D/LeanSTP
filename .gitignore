@@ -5,6 +5,7 @@ D:\REPOS\LeanSTP\Launcher\config.json
 *.ko
 *.obj
 *.elf
+*.pyc
 
 # Visual Studio Project Items:
 *.suo

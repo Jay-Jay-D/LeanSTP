@@ -1461,6 +1461,8 @@ namespace QuantConnect.Algorithm
                         AddToUserDefinedUniverse(security);
                     }
 
+                    SubscriptionManager.HasCustomData = universe.Members.Any(x => x.Value.Subscriptions.Any(y => y.IsCustomData));
+
                     return ret;
                 }
             }
@@ -1477,8 +1479,6 @@ namespace QuantConnect.Algorithm
         public void AddData<T>(string symbol, Resolution resolution = Resolution.Minute)
             where T : IBaseData, new()
         {
-            if (_locked) return;
-
             //Add this new generic data as a tradeable security: 
             // Defaults:extended market hours"      = true because we want events 24 hours, 
             //          fillforward                 = false because only want to trigger when there's new custom data.
@@ -1498,8 +1498,6 @@ namespace QuantConnect.Algorithm
         public void AddData<T>(string symbol, Resolution resolution, bool fillDataForward, decimal leverage = 1.0m)
             where T : IBaseData, new()
         {
-            if (_locked) return;
-
             AddData<T>(symbol, resolution, TimeZones.NewYork, fillDataForward, leverage);
         }
 
@@ -1515,8 +1513,6 @@ namespace QuantConnect.Algorithm
         public void AddData<T>(string symbol, Resolution resolution, DateTimeZone timeZone, bool fillDataForward = false, decimal leverage = 1.0m)
             where T : IBaseData, new()
         {
-            if (_locked) return;
-
             var marketHoursDbEntry = _marketHoursDatabase.GetEntry(Market.USA, symbol, SecurityType.Base, timeZone);
 
             //Add this to the data-feed subscriptions
@@ -1668,6 +1664,42 @@ namespace QuantConnect.Algorithm
                 resolution = hasNonAddSecurityUniverses ? UniverseSettings.Resolution : Resolution.Daily;
             }
             return SecurityManager.CreateSecurity(Portfolio, SubscriptionManager, _marketHoursDatabase, _symbolPropertiesDatabase, SecurityInitializer, _benchmarkSymbol, resolution, true, 1m, false, true, false, LiveMode);
+        }
+
+        /// <summary>
+        /// Set the historical data provider
+        /// </summary>
+        /// <param name="historyProvider">Historical data provider</param>
+        public void SetHistoryProvider(IHistoryProvider historyProvider)
+        {
+            if (historyProvider == null)
+            {
+                throw new ArgumentNullException("Algorithm.SetHistoryProvider(): Historical data provider cannot be null.");
+            }
+            HistoryProvider = historyProvider;
+        }
+
+        /// <summary>
+        /// Set the runtime error
+        /// </summary>
+        /// <param name="exception">Represents error that occur during execution</param>
+        public void SetRunTimeError(Exception exception)
+        {
+            if (exception == null)
+            {
+                throw new ArgumentNullException("Algorithm.SetRunTimeError(): Algorithm.RunTimeError cannot be set to null.");
+            }
+
+            RunTimeError = exception;
+        }
+
+        /// <summary>
+        /// Set the state of a live deployment
+        /// </summary>
+        /// <param name="status">Live deployment status</param>
+        public void SetStatus(AlgorithmStatus status)
+        {
+            Status = status;
         }
     }
 }
