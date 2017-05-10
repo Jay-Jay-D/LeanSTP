@@ -57,5 +57,11 @@
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Caller\QuantConnect.Lean.Caller.csproj">
+      <Project>{6AA5CD73-0F01-434E-8EA0-327DF415CF6D}</Project>
+      <Name>QuantConnect.Lean.Caller</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

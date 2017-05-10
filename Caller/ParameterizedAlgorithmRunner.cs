@@ -1,17 +1,17 @@
-﻿using QuantConnect.Util;
+﻿
+
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using Newtonsoft.Json;
-using QuantConnect;
 using QuantConnect.Configuration;
 using QuantConnect.Lean.Engine;
 using QuantConnect.Lean.Engine.Results;
 using QuantConnect.Logging;
+using QuantConnect.Util;
+using System.Threading.Tasks;
 
 namespace QuantConnect.Lean.Caller
 {
@@ -33,16 +33,20 @@ namespace QuantConnect.Lean.Caller
                 Config.Set("result-handler", "QuantConnect.Lean.Engine.Results.BacktestingResultHandler");
                 Config.Set("algorithm-language", Language.CSharp.ToString());
                 Config.Set("algorithm-location", "QuantConnect.Algorithm." + Language.CSharp.ToString() + ".dll");
-                Config.Set("data-folder", "D:/AlgorithmicTrading/DATA/FOREX/");
+                Config.Set("data-folder", "D:/AlgorithmicTrading/DATA/ForexQuotes");
                 //Config.Set("data-provider", "QuantConnect.Lean.Engine.DataFeeds.DefaultDataProvider");
                 Config.Set("parameters", JsonConvert.SerializeObject(parameters));
 
-                var fastMa = parameters["ema-fast"];
-                var slowMa = parameters["ema-slow"];
-                var testFileNamesID = string.Format("{0}_{1}-{2}", algorithm, fastMa, slowMa);
+
+                var fileIdSb = new StringBuilder(algorithm);
                 var guid = Guid.NewGuid().ToString();
-                var logFilePath = Path.Combine(outputFolder, string.Format("Backtest_{0}_{1}.log", testFileNamesID, guid));
-                
+                //fileIdSb.Append(guid);
+
+                foreach (var parameter in parameters)
+                {
+                    fileIdSb.Append("_" + parameter.Value);
+                }
+                var logFilePath = Path.Combine(outputFolder, string.Format("Backtest_{0}.log", fileIdSb));
 
                 var debugEnabled = Log.DebuggingEnabled;
                 //var logHandlers = new ILogHandler[] { new ConsoleLogHandler(), new FileLogHandler(logFilePath, false) };
@@ -55,8 +59,10 @@ namespace QuantConnect.Lean.Caller
 
                     Log.LogHandler.Trace(new String('=', 120));
                     Log.LogHandler.Trace("\tTesting algorithm " + algorithm);
-                    Log.LogHandler.Trace("\t\t => Fast Moving Average period: " + fastMa);
-                    Log.LogHandler.Trace("\t\t => Slow Moving Average period: " + slowMa);
+                    foreach (var parameter in parameters)
+                    {
+                        Log.LogHandler.Trace(string.Format("\t\t => {0}: {1}", parameter.Key, parameter.Value));
+                    }
                     Log.LogHandler.Trace(new String('=', 120));
 
                     // run the algorithm in its own thread
@@ -78,7 +84,7 @@ namespace QuantConnect.Lean.Caller
                     dynamic results = new ExpandoObject();
                     results.BacktestStatistics = backtestStatistics;
                     results.CustomStatistics = algorithmCustomStatistics;
-                    var resultsFileName = string.Format("BacktestResults_{0}_{1}.json", testFileNamesID, guid);
+                    var resultsFileName = string.Format("BacktestResults_{0}.json", fileIdSb);
                     File.WriteAllText(Path.Combine(outputFolder, resultsFileName), JsonConvert.SerializeObject(results, Formatting.Indented));
                 }
             }
