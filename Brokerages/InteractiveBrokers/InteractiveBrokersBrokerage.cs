@@ -852,7 +852,6 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
 
                     var data = new List<IB.HistoricalDataEventArgs>();
                     var historicalTicker = GetNextTickerId();
-<<<<<<< HEAD
 
                     EventHandler<IB.HistoricalDataEventArgs> clientOnHistoricalData = (sender, args) =>
                     {
@@ -870,25 +869,6 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
                         }
                     };
 
-=======
-
-                    EventHandler<IB.HistoricalDataEventArgs> clientOnHistoricalData = (sender, args) =>
-                    {
-                        if (args.RequestId == historicalTicker)
-                        {
-                            data.Add(args);
-                        }
-                    };
-
-                    EventHandler<IB.HistoricalDataEndEventArgs> clientOnHistoricalDataEnd = (sender, args) =>
-                    {
-                        if (args.RequestId == historicalTicker)
-                        {
-                            manualResetEvent.Set();
-                        }
-                    };
-
->>>>>>> update fork
                     EventHandler<IB.ErrorEventArgs> clientOnError = (sender, args) =>
                     {
                         if (args.Code == 162 && args.Message.Contains("pacing violation"))
@@ -1146,7 +1126,6 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
                 else
                 {
                     // IB likes to duplicate/triplicate some events, so we fire non-fill events only if status changed
-<<<<<<< HEAD
                     if (status != order.Status)
                     {
                         if (order.Status.IsClosed())
@@ -1167,14 +1146,6 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
                                 Status = status
                             });
                         }
-=======
-                    if (status != order.Status && status != OrderStatus.New)
-                    {
-                        OnOrderEvent(new OrderEvent(order, DateTime.UtcNow, 0, "Interactive Brokers Order Event")
-                        {
-                            Status = status
-                        });
->>>>>>> update fork
                     }
                 }
             }
@@ -2503,7 +2474,7 @@ namespace QuantConnect.Brokerages.InteractiveBrokers
         private readonly ConcurrentDictionary<Symbol, int> _lastBidSizes = new ConcurrentDictionary<Symbol, int>();
         private readonly ConcurrentDictionary<Symbol, decimal> _lastAskPrices = new ConcurrentDictionary<Symbol, decimal>();
         private readonly ConcurrentDictionary<Symbol, int> _lastAskSizes = new ConcurrentDictionary<Symbol, int>();
-        private readonly ConcurrentDictionary<string, int> _openInterests = new ConcurrentDictionary<string, int>();
+        private readonly ConcurrentDictionary<Symbol, int> _openInterests = new ConcurrentDictionary<Symbol, int>();
         private readonly List<Tick> _ticks = new List<Tick>();
 
 
