@@ -48,6 +48,7 @@
 *Algorithm.Python/Lib/*
 */[Ee]xtensions/*
 !**/Libraries/*
+*Launcher/config.json
 
 # C Debug Binaries
 *.pdb
