@@ -2,7 +2,7 @@
 
 namespace QuantConnect.Lean.Caller
 {
-    internal class LeanParameterizedCaller
+    internal static class LeanParameterizedCaller
     {
         private static void Main(string[] args)
         {

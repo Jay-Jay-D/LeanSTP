@@ -16,42 +16,6 @@ namespace QuantConnect.Algorithm.CSharp
     /// <seealso cref="QuantConnect.Algorithm.QCAlgorithm" />
     public class ForexVanillaMomentum : QCAlgorithm
     {
-        #region Investment Universe
-
-        private readonly string[] forexTickers =
-        {
-            "AUDCAD", "AUDCHF", "AUDJPY", "AUDNZD", "AUDUSD", "CADCHF", "CADJPY",
-            "CHFJPY", "EURAUD", "EURCAD", "EURCHF", "EURGBP", "EURJPY", "EURNOK",
-            "EURNZD", "EURSEK", "EURTRY", "EURUSD", "GBPAUD", "GBPCAD", "GBPCHF",
-            "GBPJPY", "GBPNZD", "GBPUSD", "NZDCAD", "NZDCHF", "NZDJPY", "NZDUSD",
-            "TRYJPY", "USDCAD", "USDCHF", "USDJPY", "USDMXN", "USDNOK", "USDSEK",
-            "USDTRY" // "USDCNH", "ZARJPY", "USDZAR", 
-        };
-
-        #endregion
-
-        #region Auxiliary Methods
-
-        private void UpdateAssetsReturns()
-        {
-            var dateRequest = new DateTime(Time.Year - 1, Time.Month, Time.Day);
-            // I ask for some days before just in case the selected day hasn't historical prices records.
-            var history = History(symbols, dateRequest.AddDays(-5), dateRequest.AddDays(1), Resolution.Daily);
-            foreach (var symbol in symbols)
-                try
-                {
-                    var slice = history.Last(s => s.ContainsKey(symbol));
-                    excessReturns[symbol] = Securities[symbol].Price / slice[symbol].Price - 1m;
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(symbol + " hasn't data to estimate excess returns.");
-                    excessReturns[symbol] = 0m;
-                }
-        }
-
-        #endregion
-
         #region Algorithm Parameters
 
         [Parameter("broker")] private readonly string forexMarket = "oanda";
@@ -64,7 +28,21 @@ namespace QuantConnect.Algorithm.CSharp
 
         [Parameter("pairs_to_trade")] private readonly int pairsToTrade = 3;
 
-        #endregion
+        #endregion Algorithm Parameters
+
+        #region Investment Universe
+
+        private readonly string[] forexTickers =
+        {
+            "AUDCAD", "AUDCHF", "AUDJPY", "AUDNZD", "AUDUSD", "CADCHF", "CADJPY",
+            "CHFJPY", "EURAUD", "EURCAD", "EURCHF", "EURGBP", "EURJPY", "EURNOK",
+            "EURNZD", "EURSEK", "EURTRY", "EURUSD", "GBPAUD", "GBPCAD", "GBPCHF",
+            "GBPJPY", "GBPNZD", "GBPUSD", "NZDCAD", "NZDCHF", "NZDJPY", "NZDUSD",
+            "TRYJPY", "USDCAD", "USDCHF", "USDJPY", "USDMXN", "USDNOK", "USDSEK",
+            "USDTRY" // "USDCNH", "ZARJPY", "USDZAR",
+        };
+
+        #endregion Investment Universe
 
         #region Fields
 
@@ -78,7 +56,7 @@ namespace QuantConnect.Algorithm.CSharp
         private Symbol[] symbolsToLong;
         private bool readytoTrade;
 
-        #endregion
+        #endregion Fields
 
         #region QCAlgorithm Methods
 
@@ -150,12 +128,33 @@ namespace QuantConnect.Algorithm.CSharp
             });
         }
 
-        public override void OnEndOfDay()
+        public override void OnEndOfAlgorithm()
         {
-            Debug(string.Format("=== EOD {0} ===", Time.Date.ToShortDateString()));
-            //Log(string.Format("=== EOD {0} ===", Time.Date.ToShortDateString()));
+            Liquidate();
         }
 
-        #endregion
+        #endregion QCAlgorithm Methods
+
+        #region Auxiliary Methods
+
+        private void UpdateAssetsReturns()
+        {
+            var dateRequest = new DateTime(Time.Year - 1, Time.Month, Time.Day);
+            // I ask for some days before just in case the selected day hasn't historical prices records.
+            var history = History(symbols, dateRequest.AddDays(-5), dateRequest.AddDays(1), Resolution.Daily);
+            foreach (var symbol in symbols)
+                try
+                {
+                    var slice = history.Last(s => s.ContainsKey(symbol));
+                    excessReturns[symbol] = Securities[symbol].Price / slice[symbol].Price - 1m;
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(symbol + " hasn't data to estimate excess returns.");
+                    excessReturns[symbol] = 0m;
+                }
+        }
+
+        #endregion Auxiliary Methods
     }
 }
