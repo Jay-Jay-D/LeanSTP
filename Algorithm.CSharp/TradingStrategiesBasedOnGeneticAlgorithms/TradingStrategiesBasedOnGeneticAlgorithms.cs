@@ -1,70 +1,72 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using QuantConnect.Indicators;
 
-namespace QuantConnect.Algorithm.CSharp.TradingStrategiesBasedOnGeneticAlgorithms
+namespace QuantConnect.Algorithm.CSharp
 {
+
+    public enum TradeRuleDirection
+    {
+        LongOnly = 1,
+        ShortOnly = -1
+    }
+
+
+
     public class TradingStrategiesBasedOnGeneticAlgorithms : QCAlgorithm
     {
-
     }
 
     internal class TradingRule
     {
-        private ITechnicalIndicatorSignal[] _technicalIndicatorSignals;
-        Tuple<string, string> _booleanOperators;
+        private readonly Tuple<string, string> _logicalOperators;
+        private readonly ITechnicalIndicatorSignal[] _technicalIndicatorSignals;
+
+        public TradingRule(ITechnicalIndicatorSignal[] technicalIndicatorSignals,
+            Tuple<string, string> logicalOperators)
+        {
+            _technicalIndicatorSignals = technicalIndicatorSignals;
+            _logicalOperators = logicalOperators;
+        }
 
         public bool TradeRuleSignal
         {
             get { return GetTradeRuleSignal(); }
         }
 
-        public TradingRule(ITechnicalIndicatorSignal[] technicalIndicatorSignals,
-            Tuple<string, string> booleanOperators)
+        private bool GetTradeRuleSignal()
         {
-            _technicalIndicatorSignals = technicalIndicatorSignals;
-            _booleanOperators = booleanOperators;
-        }
-
-        public bool GetTradeRuleSignal()
-        {
-            bool tradeRuleSignal = false;
-            if (_booleanOperators.Item1 == "and" && _booleanOperators.Item2 == "and")
+            var tradeRuleSignal = false;
+            if (_logicalOperators.Item1 == "and" && _logicalOperators.Item2 == "and")
             {
                 tradeRuleSignal = _technicalIndicatorSignals[0].GetSignal() &&
                                   _technicalIndicatorSignals[1].GetSignal() &&
                                   _technicalIndicatorSignals[2].GetSignal();
             }
-            else if (_booleanOperators.Item1 == "and" && _booleanOperators.Item2 == "or")
+            else if (_logicalOperators.Item1 == "and" && _logicalOperators.Item2 == "or")
             {
                 tradeRuleSignal = _technicalIndicatorSignals[0].GetSignal() &&
                                   _technicalIndicatorSignals[1].GetSignal() ||
                                   _technicalIndicatorSignals[2].GetSignal();
             }
-            else if (_booleanOperators.Item1 == "or" && _booleanOperators.Item2 == "and")
+            else if (_logicalOperators.Item1 == "or" && _logicalOperators.Item2 == "and")
             {
                 tradeRuleSignal = _technicalIndicatorSignals[0].GetSignal() ||
                                   _technicalIndicatorSignals[1].GetSignal() &&
                                   _technicalIndicatorSignals[2].GetSignal();
             }
-            else if (_booleanOperators.Item1 == "or" && _booleanOperators.Item2 == "or")
+            else if (_logicalOperators.Item1 == "or" && _logicalOperators.Item2 == "or")
             {
                 tradeRuleSignal = _technicalIndicatorSignals[0].GetSignal() ||
                                   _technicalIndicatorSignals[1].GetSignal() ||
                                   _technicalIndicatorSignals[2].GetSignal();
             }
             return tradeRuleSignal;
-
         }
-
-
-
-
     }
 
-    interface ITechnicalIndicatorSignal
+    
+
+    public interface ITechnicalIndicatorSignal
     {
         bool GetSignal();
     }
