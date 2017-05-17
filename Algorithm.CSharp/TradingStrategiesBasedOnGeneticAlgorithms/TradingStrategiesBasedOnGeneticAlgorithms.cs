@@ -64,7 +64,15 @@ namespace QuantConnect.Algorithm.CSharp
         }
     }
 
-    
+
+    public class OscillatorSignal : ITechnicalIndicatorSignal
+    {
+        public bool GetSignal()
+        {
+            throw new NotImplementedException();
+        }
+    }
+
 
     public interface ITechnicalIndicatorSignal
     {

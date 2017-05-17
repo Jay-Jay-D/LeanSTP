@@ -74,7 +74,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="QCForumAlgorithms\CrossingMovingAverages.cs" />
+    <Compile Include="TradingStrategiesBasedOnGeneticAlgorithms\CrossingMovingAverages.cs" />
     <Compile Include="QCForumAlgorithms\EMACrossingALMA.cs" />
     <Compile Include="QCForumAlgorithms\ForexVanillaMomentum.cs" />
     <Compile Include="QCForumAlgorithms\HullMA.cs" />

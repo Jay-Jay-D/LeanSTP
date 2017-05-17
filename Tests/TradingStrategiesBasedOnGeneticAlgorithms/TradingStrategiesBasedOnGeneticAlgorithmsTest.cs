@@ -2,6 +2,7 @@
 using QuantConnect.Algorithm.CSharp;
 using System;
 using System.Collections.Generic;
+using QuantConnect.Util;
 
 namespace QuantConnect.Tests.TradingStrategiesBasedOnGeneticAlgorithms
 {
@@ -11,7 +12,7 @@ namespace QuantConnect.Tests.TradingStrategiesBasedOnGeneticAlgorithms
         [Test]
         public void PassTest()
         {
-            Assert.Pass("duh!");
+            Assert.True("duh!");
         }
     }
 }
