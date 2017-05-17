@@ -176,6 +176,7 @@
     <Compile Include="QCUExamples\OrderTicketDemoAlgorithm.cs" />
     <Compile Include="QCUExamples\WeeklyUniverseSelectionRegressionAlgorithm.cs" />
     <Compile Include="TermStructureEffectinCommodities.cs" />
+    <Compile Include="TradingStrategiesBasedOnGeneticAlgorithms\TradingStrategiesBasedOnGeneticAlgorithms.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Algorithm\QuantConnect.Algorithm.csproj">
@@ -197,6 +198,7 @@
       <SubType>Designer</SubType>
     </None>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Accord.3.3.0\build\Accord.targets" Condition="Exists('..\packages\Accord.3.3.0\build\Accord.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
