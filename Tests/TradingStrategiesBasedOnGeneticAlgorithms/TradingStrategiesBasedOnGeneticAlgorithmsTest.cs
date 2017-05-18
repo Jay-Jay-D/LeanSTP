@@ -114,6 +114,7 @@ namespace QuantConnect.Tests.TradingStrategiesBasedOnGeneticAlgorithms
             return testsNames.Select(t => new TestCaseData(t).SetName(t)).ToArray();
         }
 
+        [Ignore("QC account data should be configured in the config.json file.")]
         [Test, TestCaseSource("GetTestingAlgorithmNames")]
         public void RunRiskManagerAlgorithm(string test)
         {
