@@ -1,18 +1,95 @@
-﻿using NUnit.Framework;
+﻿using System.Linq;
+using System.Text;
+using DynamicExpresso;
+using NUnit.Framework;
 using QuantConnect.Algorithm.CSharp;
-using System;
-using System.Collections.Generic;
-using QuantConnect.Util;
 
 namespace QuantConnect.Tests.TradingStrategiesBasedOnGeneticAlgorithms
 {
+    internal class TrueIndicatorSignal : ITechnicalIndicatorSignal
+    {
+        public bool GetSignal()
+        {
+            return true;
+        }
+    }
+
+    internal class FalseIndicatorSignal : ITechnicalIndicatorSignal
+    {
+        public bool GetSignal()
+        {
+            return false;
+        }
+    }
+
     [TestFixture]
     public class TradingStrategiesBasedOnGeneticAlgorithmsTest
     {
         [Test]
-        public void PassTest()
+        public void DynamoExpressoStringBuilderTests()
         {
-            Assert.True("duh!");
+            var interpreter = new Interpreter();
+            bool[] booleanArray = {true, false, true};
+
+            string[] operators = {"and", "or"};
+
+            var condition = new StringBuilder();
+
+            for (var i = 0; i < operators.Length; i++)
+            {
+                var stringOperator = operators[i] == "and" ? "&&" : "||";
+                condition.Append(booleanArray[i].ToString().ToLower() + stringOperator);
+            }
+            condition.Append(booleanArray.Last().ToString().ToLower());
+            Assert.AreEqual("true&&false||true", condition.ToString());
+            Assert.True(interpreter.Eval<bool>(condition.ToString()));
+        }
+
+        [Test]
+        public void DynamoExpressoTests()
+        {
+            var interpreter = new Interpreter();
+            var result = interpreter.Eval("true && false || true");
+            Assert.True((bool) result);
+        }
+
+        [Test]
+        public void EvaluateConditionalForFiveThechincalIndicator()
+        {
+            // Arrange
+            ITechnicalIndicatorSignal[] IndicatorSignals =
+            {
+                new TrueIndicatorSignal(),
+                new FalseIndicatorSignal(),
+                new TrueIndicatorSignal(),
+                new FalseIndicatorSignal(),
+                new TrueIndicatorSignal()
+            };
+            string[] operators = {"and", "or", "and", "or"};
+            var tradeRule = new TradingRule(IndicatorSignals, operators);
+            // Act
+            var actual = tradeRule.TradeRuleSignal;
+            // Assert
+            Assert.True(actual);
+        }
+
+        [Test]
+        public void EvaluateConditionalForFourThechincalIndicator()
+        {
+            // Arrange
+            ITechnicalIndicatorSignal[] IndicatorSignals =
+            {
+                new TrueIndicatorSignal(),
+                new FalseIndicatorSignal(),
+                new FalseIndicatorSignal(),
+                new TrueIndicatorSignal()
+            };
+            string[] operators = {"and", "and", "and"};
+            var tradeRule = new TradingRule(IndicatorSignals, operators);
+            // Act
+            var actual = tradeRule.TradeRuleSignal;
+            // Assert
+            Assert.False(actual);
         }
     }
 }

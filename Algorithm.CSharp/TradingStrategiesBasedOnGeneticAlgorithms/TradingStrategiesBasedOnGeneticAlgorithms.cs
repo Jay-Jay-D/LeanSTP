@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Linq;
+using System.Text;
+using DynamicExpresso;
 using QuantConnect.Indicators;
 
 namespace QuantConnect.Algorithm.CSharp
@@ -16,16 +19,18 @@ namespace QuantConnect.Algorithm.CSharp
     {
     }
 
-    internal class TradingRule
+    public class TradingRule
     {
-        private readonly Tuple<string, string> _logicalOperators;
+        private readonly string[] _logicalOperators;
         private readonly ITechnicalIndicatorSignal[] _technicalIndicatorSignals;
+        private Interpreter _interpreter;
 
         public TradingRule(ITechnicalIndicatorSignal[] technicalIndicatorSignals,
-            Tuple<string, string> logicalOperators)
+            string[] logicalOperators)
         {
             _technicalIndicatorSignals = technicalIndicatorSignals;
             _logicalOperators = logicalOperators;
+            _interpreter = new Interpreter();
         }
 
         public bool TradeRuleSignal
@@ -35,32 +40,18 @@ namespace QuantConnect.Algorithm.CSharp
 
         private bool GetTradeRuleSignal()
         {
-            var tradeRuleSignal = false;
-            if (_logicalOperators.Item1 == "and" && _logicalOperators.Item2 == "and")
+            string stringSignal;
+            var condition = new StringBuilder();
+
+            for (int i = 0; i < _logicalOperators.Length; i++)
             {
-                tradeRuleSignal = _technicalIndicatorSignals[0].GetSignal() &&
-                                  _technicalIndicatorSignals[1].GetSignal() &&
-                                  _technicalIndicatorSignals[2].GetSignal();
+                var stringOperator = _logicalOperators[i] == "and" ? "&&" : "||";
+                stringSignal = _technicalIndicatorSignals[i].GetSignal().ToString().ToLower();
+                condition.Append(stringSignal + stringOperator);
             }
-            else if (_logicalOperators.Item1 == "and" && _logicalOperators.Item2 == "or")
-            {
-                tradeRuleSignal = _technicalIndicatorSignals[0].GetSignal() &&
-                                  _technicalIndicatorSignals[1].GetSignal() ||
-                                  _technicalIndicatorSignals[2].GetSignal();
-            }
-            else if (_logicalOperators.Item1 == "or" && _logicalOperators.Item2 == "and")
-            {
-                tradeRuleSignal = _technicalIndicatorSignals[0].GetSignal() ||
-                                  _technicalIndicatorSignals[1].GetSignal() &&
-                                  _technicalIndicatorSignals[2].GetSignal();
-            }
-            else if (_logicalOperators.Item1 == "or" && _logicalOperators.Item2 == "or")
-            {
-                tradeRuleSignal = _technicalIndicatorSignals[0].GetSignal() ||
-                                  _technicalIndicatorSignals[1].GetSignal() ||
-                                  _technicalIndicatorSignals[2].GetSignal();
-            }
-            return tradeRuleSignal;
+            stringSignal = _technicalIndicatorSignals.Last().GetSignal().ToString().ToLower();
+            condition.Append(stringSignal);
+            return _interpreter.Eval<bool>(condition.ToString());
         }
     }
 
