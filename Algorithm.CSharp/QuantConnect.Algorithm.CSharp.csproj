@@ -180,6 +180,7 @@
     <Compile Include="QCUExamples\OrderTicketDemoAlgorithm.cs" />
     <Compile Include="QCUExamples\WeeklyUniverseSelectionRegressionAlgorithm.cs" />
     <Compile Include="TermStructureEffectinCommodities.cs" />
+    <Compile Include="TradingStrategiesBasedOnGeneticAlgorithms\TestingQCAlgorithms.cs" />
     <Compile Include="TradingStrategiesBasedOnGeneticAlgorithms\TradingStrategiesBasedOnGeneticAlgorithms.cs" />
   </ItemGroup>
   <ItemGroup>

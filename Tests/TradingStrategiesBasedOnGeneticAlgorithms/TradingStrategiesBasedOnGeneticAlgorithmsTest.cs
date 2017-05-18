@@ -1,8 +1,11 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Text;
 using DynamicExpresso;
 using NUnit.Framework;
 using QuantConnect.Algorithm.CSharp;
+using QuantConnect.Indicators;
+using QuantConnect.Tests.Indicators;
 
 namespace QuantConnect.Tests.TradingStrategiesBasedOnGeneticAlgorithms
 {
@@ -91,5 +94,34 @@ namespace QuantConnect.Tests.TradingStrategiesBasedOnGeneticAlgorithms
             // Assert
             Assert.False(actual);
         }
+
+        [Test]
+        public void SelectedOscillatorsCanBeHandledAsIIndicatorOfIBaseData()
+        {
+            var indicatorSIgnal = new OscillatorSignal(Symbol.Empty, "RelativeStrengthIndex", new object[]{14});
+            Assert.IsNotNull(indicatorSIgnal.Indicator);
+            Assert.IsInstanceOf<RelativeStrengthIndex>(indicatorSIgnal.Indicator);
+        }
+
+
+        private static TestCaseData[] GetTestingAlgorithmNames()
+        {
+            //// Arrange
+            string[] testsNames = {
+                "RsiInstantiatedAndRegisteredCorrectly",
+            };
+
+            return testsNames.Select(t => new TestCaseData(t).SetName(t)).ToArray();
+        }
+
+        [Test, TestCaseSource("GetTestingAlgorithmNames")]
+        public void RunRiskManagerAlgorithm(string test)
+        {
+            Assert.DoesNotThrow(() => AlgorithmRunner.RunLocalBacktest(test), "Fail at " + test);
+        }
+
+
+
+
     }
 }

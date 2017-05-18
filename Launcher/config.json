@@ -6,6 +6,8 @@
   // two predefined environments, 'backtesting' and 'live', feel free
   // to add more!
 
+  // TESTING CONFIG IGNORE.
+
   "environment": "backtesting", // "live-paper", "backtesting", "live-interactive", "live-interactive-iqfeed"
 
   // algorithm class selector
