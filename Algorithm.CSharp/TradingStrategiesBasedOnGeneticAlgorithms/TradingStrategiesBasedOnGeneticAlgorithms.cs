@@ -1,8 +1,8 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Text;
 using DynamicExpresso;
 using QuantConnect.Data;
+using QuantConnect.Data.Market;
 using QuantConnect.Indicators;
 
 namespace QuantConnect.Algorithm.CSharp
@@ -50,30 +50,6 @@ namespace QuantConnect.Algorithm.CSharp
 
             var interpreter = new Interpreter();
             return interpreter.Eval<bool>(condition.ToString());
-        }
-    }
-
-    public class OscillatorSignal : ITechnicalIndicatorSignal
-    {
-        private Symbol spy;
-        private string v1;
-        private object[] v2;
-
-        public dynamic Indicator { get; private set; }
-
-        public OscillatorSignal(Symbol symbol, string indicatorName, object[] indicatorParameters)
-        {
-            var indicatorType = typeof(Indicator).Assembly
-                .GetTypes()
-                .FirstOrDefault(i => i.Name == indicatorName);
-             Indicator = Activator.CreateInstance(indicatorType, indicatorParameters);
-
-
-        }
-
-        public bool GetSignal()
-        {
-            throw new NotImplementedException();
         }
     }
 

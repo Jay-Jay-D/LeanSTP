@@ -96,9 +96,11 @@ namespace QuantConnect.Tests.TradingStrategiesBasedOnGeneticAlgorithms
         }
 
         [Test]
+        [Ignore("Testing tests to tests :)")]
         public void SelectedOscillatorsCanBeHandledAsIIndicatorOfIBaseData()
         {
-            var indicatorSIgnal = new OscillatorSignal(Symbol.Empty, "RelativeStrengthIndex", new object[]{14});
+            var actualRsi = new RelativeStrengthIndex(14);
+            var indicatorSIgnal = new OscillatorSignal(actualRsi);
             Assert.IsNotNull(indicatorSIgnal.Indicator);
             Assert.IsInstanceOf<RelativeStrengthIndex>(indicatorSIgnal.Indicator);
         }
@@ -109,12 +111,14 @@ namespace QuantConnect.Tests.TradingStrategiesBasedOnGeneticAlgorithms
             //// Arrange
             string[] testsNames = {
                 "RsiInstantiatedAndRegisteredCorrectly",
+                "OscillatorGivesTheSignalsCorrectly"
             };
 
             return testsNames.Select(t => new TestCaseData(t).SetName(t)).ToArray();
         }
 
-        [Ignore("QC account data should be configured in the config.json file.")]
+        //[Ignore("QC account data should be configured in the config.json file.")]
+        [Category("TravisExclude")]
         [Test, TestCaseSource("GetTestingAlgorithmNames")]
         public void RunRiskManagerAlgorithm(string test)
         {

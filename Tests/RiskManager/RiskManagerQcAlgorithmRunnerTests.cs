@@ -2,7 +2,7 @@
 
 namespace QuantConnect.Tests.RiskManager
 {
-    [TestFixture]
+    [TestFixture, Category("TravisExclude")]
     public class RiskManagerQcAlgorithmRunnerTests
     {
         [Test]
