@@ -9,9 +9,9 @@ namespace QuantConnect.Algorithm.CSharp
         BellowLowerThreshold = -2,
         CrossLowerThresholdFromBelow = -1,
         BetweenThresholds = 0,
-        CrossUpperThresholdFromBelow = 1,
+        CrossUpperThresholdFromBelow = 3,
         AboveUpperThreshold = 2,
-        CrossUpperThresholdFromAbove = 3
+        CrossUpperThresholdFromAbove = 1
     }
 
     public struct OscillatorThresholds
@@ -55,7 +55,6 @@ namespace QuantConnect.Algorithm.CSharp
 
         private void Indicator_Updated(object sender, IndicatorDataPoint updated)
         {
-            OscillatorSignals actualSignal;
             var actualPositionSignal = GetActualPositionSignal(updated);
             if (!Indicator.IsReady)
             {
@@ -65,8 +64,17 @@ namespace QuantConnect.Algorithm.CSharp
                 return;
             }
 
-            var indicatorCurrentValue = updated;
-            var previousSignalInt = (int) _previousSignal;
+            var actualSignal = GetaActualSignal(_previousSignal, actualPositionSignal);
+
+            Signal = actualSignal;
+            _previousIndicatorValue = updated.Value;
+            _previousSignal = actualSignal;
+        }
+
+        private OscillatorSignals GetaActualSignal(OscillatorSignals previousSignal, OscillatorSignals actualPositionSignal)
+        {
+            OscillatorSignals actualSignal;
+            var previousSignalInt = (int) previousSignal;
             var actualPositionSignalInt = (int) actualPositionSignal;
 
             if (actualPositionSignalInt == 0)
@@ -82,18 +90,16 @@ namespace QuantConnect.Algorithm.CSharp
             }
             else
             {
-                if (Math.Abs(previousSignalInt) > 1)
+                if (previousSignalInt * actualPositionSignalInt <= 0 || Math.Abs(previousSignalInt + actualPositionSignalInt)==3)
                 {
-                    actualSignal = (OscillatorSignals) (Math.Sign(previousSignalInt) * 2);
+                    actualSignal = (OscillatorSignals) (Math.Sign(actualPositionSignalInt) * 3);
                 }
                 else
                 {
-                    actualSignal = (OscillatorSignals) (Math.Sign(previousSignalInt) * 3);
+                    actualSignal = (OscillatorSignals) (Math.Sign(actualPositionSignalInt) * 2);
                 }
             }
-
-            _previousIndicatorValue = updated.Value;
-            _previousSignal = actualSignal;
+            return actualSignal;
         }
 
         private OscillatorSignals GetActualPositionSignal(decimal indicatorCurrentValue)

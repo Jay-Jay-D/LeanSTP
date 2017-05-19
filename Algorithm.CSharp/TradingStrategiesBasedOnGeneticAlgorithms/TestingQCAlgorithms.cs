@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using QuantConnect.Data;
 using QuantConnect.Indicators;
 
@@ -12,6 +12,7 @@ namespace QuantConnect.Algorithm.CSharp
     public abstract class TradingStrategiesBasedOnGeneticAlgorithmsBaseForTesting : QCAlgorithm
     {
         public Symbol spy;
+
         public override void Initialize()
         {
             SetStartDate(2014, 10, 01);
@@ -23,35 +24,39 @@ namespace QuantConnect.Algorithm.CSharp
 
     public class WriteSomeLogToTestOscillatorBehavior : TradingStrategiesBasedOnGeneticAlgorithmsBaseForTesting
     {
-        private bool isFirst = true;
-        private RelativeStrengthIndex rsi;
         private StringBuilder CsvOutput;
+        private bool isFirst = true;
+        private OscillatorSignal oscillatorRsi;
+        private RelativeStrengthIndex rsi;
 
         public override void OnData(Slice slice)
         {
             if (isFirst)
             {
                 rsi = RSI(spy, 14, MovingAverageType.Wilders);
-                CsvOutput = new StringBuilder("time,SPY,RSI(14)\n");
+                var threshodls = new OscillatorThresholds {Lower = 40, Upper = 60};
+                oscillatorRsi = new OscillatorSignal(rsi, threshodls);
+                CsvOutput = new StringBuilder("Date,RSI,OscillatorSignal\n");
                 isFirst = false;
             }
 
             if (rsi.IsReady)
             {
-                CsvOutput.AppendLine(string.Format("{0},{1},{2}", Time.Date.ToShortDateString(), slice[spy].Price, rsi.Current.Value));
+                CsvOutput.AppendLine(string.Format("{0:yyyy-MM-dd},{1},{2}", Time.Date,
+                    rsi.Current.Value.SmartRounding(), oscillatorRsi.Signal));
             }
         }
 
         public override void OnEndOfAlgorithm()
         {
-            File.WriteAllText(@"C:\Users\jjd\Desktop\test.csv", CsvOutput.ToString());
+            File.WriteAllText(@"D:\REPOS\LeanSTP\Tests\TestData\testSignals.csv", CsvOutput.ToString());
         }
     }
 
     public class RsiInstantiatedAndRegisteredCorrectly : TradingStrategiesBasedOnGeneticAlgorithmsBaseForTesting
     {
-        private bool isFirst = true;
         private RelativeStrengthIndex actualRsi;
+        private bool isFirst = true;
         private OscillatorSignal oscillatorRsi;
 
         public override void OnData(Slice slice)
@@ -74,8 +79,8 @@ namespace QuantConnect.Algorithm.CSharp
                 }
                 else
                 {
-                    RuntimeStatistics["RsiIsCorrectlyInstantitadedAndRegistered"] = rsiIsCorrectlyInstantitadedAndRegistered.ToString();
-
+                    RuntimeStatistics["RsiIsCorrectlyInstantitadedAndRegistered"] =
+                        rsiIsCorrectlyInstantitadedAndRegistered.ToString();
                 }
 
                 var rsiIsCorrectlyEstimated = actualRsi.Current.Value == oscillatorRsi.Indicator.Current.Value;
@@ -88,7 +93,6 @@ namespace QuantConnect.Algorithm.CSharp
                 else
                 {
                     RuntimeStatistics["RsiIsCorrectlyEstimated"] = rsiIsCorrectlyEstimated.ToString();
-
                 }
             }
         }
@@ -98,92 +102,38 @@ namespace QuantConnect.Algorithm.CSharp
     {
         private bool isFirst = true;
         private OscillatorSignal oscillatorRsi;
-
-        public override void OnEndOfAlgorithm()
-        {
-            base.OnEndOfAlgorithm();
-        }
+        private Dictionary<DateTime, OscillatorSignals> testingData = new Dictionary<DateTime, OscillatorSignals>();
 
         public override void OnData(Slice slice)
         {
             if (isFirst)
             {
                 var injectedRsi = RSI(spy, 14, MovingAverageType.Wilders);
-                var threshodls = new OscillatorThresholds { Lower = 40, Upper = 60 };
+                var threshodls = new OscillatorThresholds {Lower = 40, Upper = 60};
                 oscillatorRsi = new OscillatorSignal(injectedRsi, threshodls);
+                var csv = File.ReadAllLines(@".\TestData\testSignals.csv");
+                testingData = csv.Skip(1).Select(l => l.Split(','))
+                    .ToDictionary(l => DateTime.ParseExact(l[0], "yyyy-MM-dd", CultureInfo.InvariantCulture).Date,
+                        l => (OscillatorSignals) Enum.Parse(typeof(OscillatorSignals), l[2]));
+
                 isFirst = false;
             }
 
-            if (Time.Date == new DateTime(2014, 10, 30) || Time.Date == new DateTime(2014, 12, 12) || Time.Date == new DateTime(2014, 12, 19))
+            if (testingData.ContainsKey(Time.Date))
             {
-                var betweenTheThresholds = oscillatorRsi.Signal == OscillatorSignals.BetweenThresholds;
-                if (RuntimeStatistics.ContainsKey("BetweenTheThresholdsCorrectlyEstimated"))
+                var expectedSignal = testingData[Time.Date];
+                var testStringName = expectedSignal + "CorrectlyEstimated";
+                var testingActualSignal = oscillatorRsi.Signal == expectedSignal;
+                if (RuntimeStatistics.ContainsKey(testStringName))
                 {
-                    var lastTest = bool.Parse(RuntimeStatistics["BetweenTheThresholdsCorrectlyEstimated"]);
-                    RuntimeStatistics["BetweenTheThresholdsCorrectlyEstimated"] =
-                        (lastTest && betweenTheThresholds).ToString();
+                    var lastTest = bool.Parse(RuntimeStatistics[testStringName]);
+                    RuntimeStatistics[testStringName] =
+                        (lastTest && testingActualSignal).ToString();
                 }
                 else
                 {
-                    RuntimeStatistics["BetweenTheThresholdsCorrectlyEstimated"] = betweenTheThresholds.ToString();
-
+                    RuntimeStatistics[testStringName] = testingActualSignal.ToString();
                 }
-            }
-
-            if (Time.Date == new DateTime(2014, 10, 31))
-            {
-                var crossUpperThresholdFromBelow = oscillatorRsi.Signal == OscillatorSignals.CrossUpperThresholdFromBelow;
-                RuntimeStatistics["CrossUpperThresholdFromBelowCorrectlyEstimated"] = crossUpperThresholdFromBelow.ToString();
-            }
-
-            if (Time.Date == new DateTime(2014, 11, 01) || Time.Date == new DateTime(2014, 12, 10))
-            {
-                var aboveUpperThreshold = oscillatorRsi.Signal == OscillatorSignals.AboveUpperThreshold;
-                if (RuntimeStatistics.ContainsKey("AboveUpperThresholdCorrectlyEstimated"))
-                {
-                    var lastTest = bool.Parse(RuntimeStatistics["AboveUpperThresholdCorrectlyEstimated"]);
-                    RuntimeStatistics["AboveUpperThresholdCorrectlyEstimated"] =
-                        (lastTest && aboveUpperThreshold).ToString();
-                }
-                else
-                {
-                    RuntimeStatistics["AboveUpperThresholdCorrectlyEstimated"] = aboveUpperThreshold.ToString();
-
-                }
-            }
-
-            if (Time.Date == new DateTime(2014, 12, 11))
-            {
-                var crossUpperThresholdFromAbove = oscillatorRsi.Signal == OscillatorSignals.CrossUpperThresholdFromAbove;
-                RuntimeStatistics["CrossUpperThresholdFromAboveCorrectlyEstimated"] = crossUpperThresholdFromAbove.ToString();
-            }
-
-            if (Time.Date == new DateTime(2014, 12, 13))
-            {
-                var crossLowerThresholdFromAbove = oscillatorRsi.Signal == OscillatorSignals.CrossLowerThresholdFromAbove;
-                RuntimeStatistics["CrossLowerThresholdFromAboveCorrectlyEstimated"] = crossLowerThresholdFromAbove.ToString();
-            }
-
-            if (Time.Date == new DateTime(2014, 12, 16) || Time.Date == new DateTime(2014, 12, 17))
-            {
-                var bellowLowerThreshold = oscillatorRsi.Signal == OscillatorSignals.BellowLowerThreshold;
-                if (RuntimeStatistics.ContainsKey("BellowLowerThresholdCorrectlyEstimated"))
-                {
-                    var lastTest = bool.Parse(RuntimeStatistics["BellowLowerThresholdCorrectlyEstimated"]);
-                    RuntimeStatistics["BellowLowerThresholdCorrectlyEstimated"] =
-                        (lastTest && bellowLowerThreshold).ToString();
-                }
-                else
-                {
-                    RuntimeStatistics["BellowLowerThresholdCorrectlyEstimated"] = bellowLowerThreshold.ToString();
-
-                }
-            }
-
-            if (Time.Date == new DateTime(2014, 12, 18))
-            {
-                var crossLowerThresholdFromBelow = oscillatorRsi.Signal == OscillatorSignals.CrossLowerThresholdFromBelow;
-                RuntimeStatistics["CrossLowerThresholdFromBelowCorrectlyEstimated"] = crossLowerThresholdFromBelow.ToString();
             }
         }
     }
