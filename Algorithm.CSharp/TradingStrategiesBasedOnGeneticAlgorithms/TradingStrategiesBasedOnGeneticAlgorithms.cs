@@ -1,60 +1,105 @@
-﻿using System.Linq;
-using System.Text;
-using DynamicExpresso;
-using QuantConnect.Data;
-using QuantConnect.Data.Market;
-using QuantConnect.Indicators;
+﻿using System;
+using System.Collections.Generic;
+using QuantConnect.Configuration;
 
 namespace QuantConnect.Algorithm.CSharp
 {
-    public enum TradeRuleDirection
-    {
-        LongOnly = 1,
-        ShortOnly = -1
-    }
-
     public class TradingStrategiesBasedOnGeneticAlgorithms : QCAlgorithm
     {
-    }
+        private readonly int indicatorSignalCount = 5;
+        private TradingRule tradingRule;
 
-    public class TradingRule
-    {
-        private readonly string[] _logicalOperators;
-        private readonly ITechnicalIndicatorSignal[] _technicalIndicatorSignals;
-
-        public TradingRule(ITechnicalIndicatorSignal[] technicalIndicatorSignals,
-            string[] logicalOperators)
+        public override void Initialize()
         {
-            _technicalIndicatorSignals = technicalIndicatorSignals;
-            _logicalOperators = logicalOperators;
+            var pair = AddForex("EURUSD").Symbol; 
+            tradingRule = SetTradingRule(pair);
         }
 
-        public bool TradeRuleSignal
+        private TradingRule SetTradingRule(Symbol pair)
         {
-            get { return GetTradeRuleSignal(); }
-        }
+            var technicalIndicatorSignals = new List<ITechnicalIndicatorSignal>();
+            var logicalOperators = new List<string>();
 
-        private bool GetTradeRuleSignal()
-        {
-            string stringSignal;
-            var condition = new StringBuilder();
-
-            for (var i = 0; i < _logicalOperators.Length; i++)
+            for (var i = 1; i <= indicatorSignalCount; i++)
             {
-                var stringOperator = _logicalOperators[i] == "and" ? "&&" : "||";
-                stringSignal = _technicalIndicatorSignals[i].GetSignal().ToString().ToLower();
-                condition.Append(stringSignal + stringOperator);
+                var indicatorSignal = SetUpIndicatorSignal(pair, i);
+                technicalIndicatorSignals.Add(indicatorSignal);
+
+                if (i != indicatorSignalCount)
+                {
+                    var parsedOperator = Config.GetInt("Operator" + i) == 0 ? "or" : "and";
+                    logicalOperators.Add(parsedOperator);
+                }
             }
-            stringSignal = _technicalIndicatorSignals.Last().GetSignal().ToString().ToLower();
-            condition.Append(stringSignal);
-
-            var interpreter = new Interpreter();
-            return interpreter.Eval<bool>(condition.ToString());
+            return new TradingRule(technicalIndicatorSignals.ToArray(), logicalOperators.ToArray());
         }
-    }
 
-    public interface ITechnicalIndicatorSignal
-    {
-        bool GetSignal();
+        private ITechnicalIndicatorSignal SetUpIndicatorSignal(Symbol pair, int indicatorN)
+        {
+            var oscillatorThresholds = new OscillatorThresholds { Lower = 20, Upper = 80 };
+            var direction = Config.GetInt("Indicator" + indicatorN + "Direction") == 0
+                ? TradeRuleDirection.LongOnly
+                : TradeRuleDirection.ShortOnly;
+
+            var indicatorId = Config.GetInt("Indicator" + indicatorN, -1);
+            //TODO: make the right stuff here.
+            if (indicatorId == -1)
+                throw new ArgumentException(
+                    "Please check the optimization.json! There are not as many indicators as it should.");
+            var indicator = (TechicalIndicators) indicatorId;
+            ITechnicalIndicatorSignal technicalIndicator;
+            switch (indicator)
+            {
+                case TechicalIndicators.SimpleMovingAverage:
+                    // Canonical cross moving average parameters.
+                    var fast = SMA(pair, 50);
+                    var slow = SMA(pair, 200);
+                    technicalIndicator = new CrossingMovingAverages(fast,slow, direction);
+                    break;
+
+                case TechicalIndicators.MovingAverageConvergenceDivergence:
+                    var macd = MACD(pair, 12, 26, 9);
+                    technicalIndicator = new CrossingMovingAverages(macd, macd.Signal, direction);
+                    break;
+
+                case TechicalIndicators.Stochastic:
+                    var sto = STO(pair, 14);
+                    technicalIndicator = new OscillatorSignal(sto.StochD, oscillatorThresholds, direction);
+                    break;
+
+                case TechicalIndicators.RelativeStrengthIndex:
+                    var rsi = RSI(pair, 14);
+                    technicalIndicator = new OscillatorSignal(rsi, oscillatorThresholds, direction);
+                    break;
+
+                case TechicalIndicators.CommodityChannelIndex:
+                    var cci = CCI(pair, 20);
+                    oscillatorThresholds.Lower = - 100;
+                    oscillatorThresholds.Lower = 100;
+                    technicalIndicator = new OscillatorSignal(cci, oscillatorThresholds, direction);
+                    break;
+
+                case TechicalIndicators.MomentumPercent:
+                    var pm = MOMP(pair, 60);
+                    oscillatorThresholds.Lower = -5;
+                    oscillatorThresholds.Lower = 5;
+                    technicalIndicator = new OscillatorSignal(pm, oscillatorThresholds, direction);
+                    break;
+
+                case TechicalIndicators.BollingerBands:
+                    break;
+
+                case TechicalIndicators.WilliamsPercentR:
+                    break;
+
+                case TechicalIndicators.PercentagePriceOscillator:
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
+            throw new NotImplementedException();
+        }
     }
 }

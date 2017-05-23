@@ -15,20 +15,14 @@ namespace QuantConnect.Algorithm.CSharp
     {
         private int _lastSignal;
         private readonly CompositeIndicator<IndicatorDataPoint> _moving_average_difference;
-        private readonly TradeRuleDirection? _tradeRuleDirection;
+        private TradeRuleDirection _tradeRuleDirection;
 
         public CrossingMovingAverages(IndicatorBase<IndicatorDataPoint> fast_moving_average,
-            IndicatorBase<IndicatorDataPoint> slow_moving_average, TradeRuleDirection? tradeRuleDirection)
+            IndicatorBase<IndicatorDataPoint> slow_moving_average, TradeRuleDirection? tradeRuleDirection = null)
         {
             _moving_average_difference = fast_moving_average.Minus(slow_moving_average);
             _moving_average_difference.Updated += ma_Updated;
-            _tradeRuleDirection = tradeRuleDirection;
-        }
-
-        public CrossingMovingAverages(IndicatorBase<IndicatorDataPoint> fast_moving_average,
-            IndicatorBase<IndicatorDataPoint> slow_moving_average)
-            : this(fast_moving_average, slow_moving_average, null)
-        {
+            if (tradeRuleDirection != null) _tradeRuleDirection = (TradeRuleDirection) tradeRuleDirection;
         }
 
         public CrossingMovingAveragesSignals Signal { get; private set; }

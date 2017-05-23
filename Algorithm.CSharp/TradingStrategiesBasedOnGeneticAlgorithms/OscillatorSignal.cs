@@ -22,11 +22,17 @@ namespace QuantConnect.Algorithm.CSharp
 
     public class OscillatorSignal : ITechnicalIndicatorSignal
     {
-        public delegate void DinamicIndicatorUdateHandler();
-
         private decimal _previousIndicatorValue;
         private OscillatorSignals _previousSignal;
         private OscillatorThresholds _thresholds;
+        private TradeRuleDirection _tradeRuleDirection;
+
+        public OscillatorSignal(dynamic indicator, OscillatorThresholds thresholds, TradeRuleDirection tradeRuleDirection)
+        {
+            SetUpClass(ref indicator, ref thresholds, tradeRuleDirection);
+        }
+
+
 
         public OscillatorSignal(dynamic indicator, OscillatorThresholds thresholds)
         {
@@ -35,7 +41,7 @@ namespace QuantConnect.Algorithm.CSharp
 
         public OscillatorSignal(dynamic indicator)
         {
-            var defaultThresholds = new OscillatorThresholds {Lower = 30, Upper = 70};
+            var defaultThresholds = new OscillatorThresholds {Lower = 20, Upper = 80};
             SetUpClass(ref indicator, ref defaultThresholds);
         }
 
@@ -116,11 +122,12 @@ namespace QuantConnect.Algorithm.CSharp
             return positionSignal;
         }
 
-        private void SetUpClass(ref dynamic indicator, ref OscillatorThresholds thresholds)
+        private void SetUpClass(ref dynamic indicator, ref OscillatorThresholds thresholds, TradeRuleDirection? tradeRuleDirection=null)
         {
             _thresholds = thresholds;
             Indicator = indicator;
             indicator.Updated += new IndicatorUpdatedHandler(Indicator_Updated);
+            if (tradeRuleDirection != null) _tradeRuleDirection = (TradeRuleDirection)tradeRuleDirection;
         }
     }
 }
