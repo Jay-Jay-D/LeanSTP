@@ -56,7 +56,21 @@ namespace QuantConnect.Algorithm.CSharp
 
         public bool GetSignal()
         {
-            throw new NotImplementedException();
+            var signal = false;
+            if (IsReady)
+            {
+                switch (_tradeRuleDirection)
+                {
+                    case TradeRuleDirection.LongOnly:
+                        signal = Signal == OscillatorSignals.CrossLowerThresholdFromBelow;
+                        break;
+
+                    case TradeRuleDirection.ShortOnly:
+                        signal = Signal == OscillatorSignals.CrossUpperThresholdFromAbove;
+                        break;
+                }
+            }
+            return signal;
         }
 
         private void Indicator_Updated(object sender, IndicatorDataPoint updated)

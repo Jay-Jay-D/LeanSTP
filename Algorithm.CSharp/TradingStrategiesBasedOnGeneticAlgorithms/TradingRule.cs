@@ -6,6 +6,17 @@ namespace QuantConnect.Algorithm.CSharp
 {
     public class TradingRule
     {
+        public bool IsReady {
+            get
+            {
+                var isReady = true;
+                foreach (var indicator in _technicalIndicatorSignals)
+                {
+                    isReady = indicator.IsReady && isReady;
+                }
+                return isReady;
+            }
+        }
         private readonly string[] _logicalOperators;
         private readonly ITechnicalIndicatorSignal[] _technicalIndicatorSignals;
 

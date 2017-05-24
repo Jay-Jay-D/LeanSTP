@@ -27,20 +27,23 @@ namespace QuantConnect.Algorithm.CSharp
 
         public CrossingMovingAveragesSignals Signal { get; private set; }
 
-        public bool IsReady { get; private set; }
+        public bool IsReady { get { return _moving_average_difference.IsReady; }}
 
         public bool GetSignal()
         {
             var signal = false;
-            switch (_tradeRuleDirection)
+            if (IsReady)
             {
-                case TradeRuleDirection.LongOnly:
-                    signal = Signal == CrossingMovingAveragesSignals.FastCrossSlowFromBelow;
-                    break;
+                switch (_tradeRuleDirection)
+                {
+                    case TradeRuleDirection.LongOnly:
+                        signal = Signal == CrossingMovingAveragesSignals.FastCrossSlowFromBelow;
+                        break;
 
-                case TradeRuleDirection.ShortOnly:
-                    signal = Signal == CrossingMovingAveragesSignals.FastCrossSlowFromAbove;
-                    break;
+                    case TradeRuleDirection.ShortOnly:
+                        signal = Signal == CrossingMovingAveragesSignals.FastCrossSlowFromAbove;
+                        break;
+                }
             }
             return signal;
         }
@@ -49,7 +52,6 @@ namespace QuantConnect.Algorithm.CSharp
         {
             if (!IsReady)
             {
-                IsReady = _moving_average_difference.Right.IsReady;
                 return;
             }
             var actualSignal = Math.Sign(_moving_average_difference);

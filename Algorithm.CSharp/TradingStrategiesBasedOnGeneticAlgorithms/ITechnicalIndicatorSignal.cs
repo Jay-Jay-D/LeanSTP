@@ -2,6 +2,7 @@ namespace QuantConnect.Algorithm.CSharp
 {
     public interface ITechnicalIndicatorSignal
     {
+        bool IsReady { get; }
         bool GetSignal();
     }
 
@@ -19,8 +20,8 @@ namespace QuantConnect.Algorithm.CSharp
         RelativeStrengthIndex = 3,
         CommodityChannelIndex = 4,
         MomentumPercent = 5,
-        BollingerBands = 6,
-        WilliamsPercentR = 7,
-        PercentagePriceOscillator=9,
+        WilliamsPercentR = 6,
+        PercentagePriceOscillator=7,
+        BollingerBands = 8,
     }
 }

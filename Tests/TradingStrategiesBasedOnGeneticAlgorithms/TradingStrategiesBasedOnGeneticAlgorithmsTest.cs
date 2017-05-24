@@ -1,16 +1,19 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Text;
 using DynamicExpresso;
 using NUnit.Framework;
 using QuantConnect.Algorithm.CSharp;
 using QuantConnect.Indicators;
-using QuantConnect.Tests.Indicators;
 
 namespace QuantConnect.Tests.TradingStrategiesBasedOnGeneticAlgorithms
 {
     internal class TrueIndicatorSignal : ITechnicalIndicatorSignal
     {
+        public bool IsReady
+        {
+            get { return true; }
+        }
+
         public bool GetSignal()
         {
             return true;
@@ -19,6 +22,11 @@ namespace QuantConnect.Tests.TradingStrategiesBasedOnGeneticAlgorithms
 
     internal class FalseIndicatorSignal : ITechnicalIndicatorSignal
     {
+        public bool IsReady
+        {
+            get { return true; }
+        }
+
         public bool GetSignal()
         {
             return false;
@@ -28,6 +36,18 @@ namespace QuantConnect.Tests.TradingStrategiesBasedOnGeneticAlgorithms
     [TestFixture]
     public class TradingStrategiesBasedOnGeneticAlgorithmsTest
     {
+        private static TestCaseData[] GetTestingAlgorithmNames()
+        {
+            //// Arrange
+            string[] testsNames =
+            {
+                "RsiInstantiatedAndRegisteredCorrectly",
+                "OscillatorGivesTheSignalsCorrectly"
+            };
+
+            return testsNames.Select(t => new TestCaseData(t).SetName(t)).ToArray();
+        }
+
         [Test]
         public void DynamoExpressoStringBuilderTests()
         {
@@ -95,38 +115,23 @@ namespace QuantConnect.Tests.TradingStrategiesBasedOnGeneticAlgorithms
             Assert.False(actual);
         }
 
-        [Test]
-        [Ignore("Testing tests to tests :)")]
-        public void SelectedOscillatorsCanBeHandledAsIIndicatorOfIBaseData()
-        {
-            var actualRsi = new RelativeStrengthIndex(14);
-            var indicatorSIgnal = new OscillatorSignal(actualRsi);
-            Assert.IsNotNull(indicatorSIgnal.Indicator);
-            Assert.IsInstanceOf<RelativeStrengthIndex>(indicatorSIgnal.Indicator);
-        }
-
-
-        private static TestCaseData[] GetTestingAlgorithmNames()
-        {
-            //// Arrange
-            string[] testsNames = {
-                "RsiInstantiatedAndRegisteredCorrectly",
-                "OscillatorGivesTheSignalsCorrectly"
-            };
-
-            return testsNames.Select(t => new TestCaseData(t).SetName(t)).ToArray();
-        }
-
         //[Ignore("QC account data should be configured in the config.json file.")]
         [Category("TravisExclude")]
-        [Test, TestCaseSource("GetTestingAlgorithmNames")]
+        [Test]
+        [TestCaseSource("GetTestingAlgorithmNames")]
         public void RunRiskManagerAlgorithm(string test)
         {
             Assert.DoesNotThrow(() => AlgorithmRunner.RunLocalBacktest(test), "Fail at " + test);
         }
 
-
-
-
+        [Test]
+        [Ignore("Testing tests to tests :)")]
+        public void SelectedOscillatorsCanBeHandledAsIIndicatorOfIBaseData()
+        {
+            var actualRsi = new RelativeStrengthIndex(period: 14);
+            var indicatorSIgnal = new OscillatorSignal(actualRsi);
+            Assert.IsNotNull(indicatorSIgnal.Indicator);
+            Assert.IsInstanceOf<RelativeStrengthIndex>(indicatorSIgnal.Indicator);
+        }
     }
 }
