@@ -52,6 +52,11 @@ namespace QuantConnect.Tests
         public static void RunLocalBacktest(string algorithm)
         {
             var backtestingResultHandler = RunAlgorithm(algorithm);
+            if (backtestingResultHandler.Algorithm.RuntimeStatistics.Count == 0)
+            {
+                throw new NotImplementedException("The testing backtest wasn't finished.");
+            }
+
             var testsResults = backtestingResultHandler.Algorithm.RuntimeStatistics;
 
             foreach (var test in testsResults.Keys)

@@ -49,6 +49,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Brokerages\InteractiveBrokers\CSharpAPI.dll</HintPath>
     </Reference>
+    <Reference Include="DynamicExpresso.Core, Version=1.3.3.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\DynamicExpresso.Core.1.3.3.4\lib\net40\DynamicExpresso.Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Ionic.Zip, Version=1.9.3.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\DotNetZip.1.9.3\lib\net20\Ionic.Zip.dll</HintPath>
@@ -300,6 +304,7 @@
     <Compile Include="TestExtensions.cs" />
     <Compile Include="Indicators\LinearWeightedMovingAverageTests.cs" />
     <Compile Include="ToolBox\LeanDataWriterTests.cs" />
+    <Compile Include="TradingStrategiesBasedOnGeneticAlgorithms\TradingStrategiesBasedOnGeneticAlgorithmsTest.cs" />
     <None Include="app.config" />
     <None Include="RegressionAlgorithms\Test_Cash.cs" />
     <None Include="RegressionAlgorithms\Test_LiveAlgorithm.cs" />
@@ -391,6 +396,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="TestData\spy_with_keltner.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="TestData\testSignals.csv">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

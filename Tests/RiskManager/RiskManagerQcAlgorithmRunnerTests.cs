@@ -2,10 +2,11 @@
 
 namespace QuantConnect.Tests.RiskManager
 {
-    [TestFixture]
+    [TestFixture, Category("TravisExclude")]
     public class RiskManagerQcAlgorithmRunnerTests
     {
         [Test]
+        [Ignore("QC account data should be configured in the config.json file.")]
         public void RunRiskManagerAlgorithm()
         {
             // Arrange
