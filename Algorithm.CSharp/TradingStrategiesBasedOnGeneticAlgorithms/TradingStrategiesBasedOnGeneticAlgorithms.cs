@@ -10,16 +10,15 @@ namespace QuantConnect.Algorithm.CSharp
     {
         private TradingRule _entryradingRule;
         private TradingRule _exitTradingRule;
-        private readonly int _indicatorSignalCount = 5;
         private Symbol _pair;
 
         public override void Initialize()
         {
-            SetCash(10000);
-            SetStartDate(2015, 01, 01);
-            SetEndDate(2015, 01, 15);
+            SetCash(1e6);
+            SetStartDate(2016, 07, 01);
+            SetEndDate(2016, 12, 31);
 
-            _pair = AddForex("EURUSD").Symbol;
+            _pair = AddForex("EURUSD", leverage:10).Symbol;
             _entryradingRule = SetTradingRule(_pair, isEntryRule: true);
             _exitTradingRule = SetTradingRule(_pair, isEntryRule: false);
         }
@@ -29,7 +28,7 @@ namespace QuantConnect.Algorithm.CSharp
             if (!_entryradingRule.IsReady) return;
             if (!Portfolio.Invested)
             {
-                if (_entryradingRule.TradeRuleSignal) SetHoldings(_pair, 1m);
+                if (_entryradingRule.TradeRuleSignal) SetHoldings(_pair, 0.1m);
             }
             else
             {
