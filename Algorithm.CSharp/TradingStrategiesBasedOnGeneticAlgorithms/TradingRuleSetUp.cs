@@ -10,6 +10,8 @@ namespace QuantConnect.Algorithm.CSharp
 {
     public partial class TradingStrategiesBasedOnGeneticAlgorithms
     {
+        private readonly int _indicatorSignalCount = 5;
+
         private TradingRule SetTradingRule(Symbol pair, bool isEntryRule)
         {
             var technicalIndicatorSignals = new List<ITechnicalIndicatorSignal>();
