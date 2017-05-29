@@ -1,7 +1,7 @@
-﻿using QuantConnect.Configuration;
-using QuantConnect.Indicators;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using QuantConnect.Configuration;
+using QuantConnect.Indicators;
 
 namespace QuantConnect.Algorithm.CSharp
 {
@@ -9,6 +9,15 @@ namespace QuantConnect.Algorithm.CSharp
     {
         private readonly int _indicatorSignalCount = 5;
 
+        /// <summary>
+        ///     Sets up the trading rule from the Config first, then form the QCAlgorithm Parameters.
+        /// </summary>
+        /// <param name="pair">The pair.</param>
+        /// <param name="isEntryRule">
+        ///     if set to <c>true</c> [is entry rule]. Only used to differentiate the genes for entry and
+        ///     exit
+        /// </param>
+        /// <returns></returns>
         private TradingRule SetTradingRule(Symbol pair, bool isEntryRule)
         {
             var technicalIndicatorSignals = new List<ITechnicalIndicatorSignal>();
@@ -30,9 +39,20 @@ namespace QuantConnect.Algorithm.CSharp
             return new TradingRule(technicalIndicatorSignals.ToArray(), logicalOperators.ToArray());
         }
 
+        /// <summary>
+        ///     Sets up indicator signal. This method is where the Technical indicator rules are defined.
+        /// </summary>
+        /// <param name="pair">The pair.</param>
+        /// <param name="indicatorN">The number if indicator.</param>
+        /// <param name="ruleAction">
+        ///     The rule action. Should be 'Entry' or 'Exit' and is only used to differentiate the genes for
+        ///     entry and exit
+        /// </param>
+        /// <returns></returns>
+        /// <exception cref="System.NotImplementedException">WIP</exception>
         private ITechnicalIndicatorSignal SetUpIndicatorSignal(Symbol pair, int indicatorN, string ruleAction)
         {
-            var oscillatorThresholds = new OscillatorThresholds { Lower = 20, Upper = 80 };
+            var oscillatorThresholds = new OscillatorThresholds {Lower = 20, Upper = 80};
             var key = ruleAction + "Indicator" + indicatorN + "Direction";
             var intDirection = GetGeneIntFromKey(key);
 
@@ -42,54 +62,55 @@ namespace QuantConnect.Algorithm.CSharp
 
             key = ruleAction + "Indicator" + indicatorN;
             var indicatorId = GetGeneIntFromKey(key);
-            var indicator = (TechicalIndicators)indicatorId;
+            var indicator = (TechicalIndicators) indicatorId;
             ITechnicalIndicatorSignal technicalIndicator = null;
             switch (indicator)
             {
                 case TechicalIndicators.SimpleMovingAverage:
                     // Canonical cross moving average parameters.
-                    var fast = SMA(pair, 50);
-                    var slow = SMA(pair, 200);
+                    var fast = SMA(pair, period: 50);
+                    var slow = SMA(pair, period: 200);
                     technicalIndicator = new CrossingMovingAverages(fast, slow, direction);
                     break;
 
                 case TechicalIndicators.MovingAverageConvergenceDivergence:
-                    var macd = MACD(pair, 12, 26, 9);
+                    var macd = MACD(pair, fastPeriod: 12, slowPeriod: 26, signalPeriod: 9);
                     technicalIndicator = new CrossingMovingAverages(macd, macd.Signal, direction);
                     break;
 
                 case TechicalIndicators.Stochastic:
-                    var sto = STO(pair, 14);
+                    var sto = STO(pair, period: 14);
                     technicalIndicator = new OscillatorSignal(sto.StochD, oscillatorThresholds, direction);
                     break;
 
                 case TechicalIndicators.RelativeStrengthIndex:
-                    var rsi = RSI(pair, 14);
+                    var rsi = RSI(pair, period: 14);
                     technicalIndicator = new OscillatorSignal(rsi, oscillatorThresholds, direction);
                     break;
 
                 case TechicalIndicators.CommodityChannelIndex:
-                    var cci = CCI(pair, 20);
+                    var cci = CCI(pair, period: 20);
                     oscillatorThresholds.Lower = -100;
                     oscillatorThresholds.Lower = 100;
                     technicalIndicator = new OscillatorSignal(cci, oscillatorThresholds, direction);
                     break;
 
                 case TechicalIndicators.MomentumPercent:
-                    var pm = MOMP(pair, 60);
+                    var pm = MOMP(pair, period: 60);
                     oscillatorThresholds.Lower = -5;
                     oscillatorThresholds.Lower = 5;
                     technicalIndicator = new OscillatorSignal(pm, oscillatorThresholds, direction);
                     break;
 
                 case TechicalIndicators.WilliamsPercentR:
-                    var wr = WILR(pair, 14);
+                    var wr = WILR(pair, period: 14);
                     technicalIndicator = new OscillatorSignal(wr, oscillatorThresholds, direction);
                     break;
 
                 case TechicalIndicators.PercentagePriceOscillator:
-                    var ppo = MACD(pair, 12, 26, 9).Over(EMA(pair, 26)).Plus(100m);
-                    var signal = new SimpleMovingAverage(9).Of(ppo);
+                    var ppo = MACD(pair, fastPeriod: 12, slowPeriod: 26, signalPeriod: 9).Over(EMA(pair, period: 26))
+                        .Plus(constant: 100m);
+                    var signal = new SimpleMovingAverage(period: 9).Of(ppo);
                     technicalIndicator = new CrossingMovingAverages(ppo, signal, direction);
                     break;
 
@@ -102,13 +123,14 @@ namespace QuantConnect.Algorithm.CSharp
         }
 
         /// <summary>
-        /// Gets the gene int from key.
+        ///     Gets the gene int from key.
         /// </summary>
         /// <param name="key">The key.</param>
         /// <returns></returns>
         /// <exception cref="System.ArgumentNullException">The gene " + key + " is not present either as Config or as Parameter</exception>
         /// <remarks>
-        /// This method makes the algorithm working with the genes defined from the Config (as in the Lean Optimization) and from the Parameters (as the Lean Caller).
+        ///     This method makes the algorithm working with the genes defined from the Config (as in the Lean Optimization) and
+        ///     from the Parameters (as the Lean Caller).
         /// </remarks>
         private int GetGeneIntFromKey(string key)
         {
