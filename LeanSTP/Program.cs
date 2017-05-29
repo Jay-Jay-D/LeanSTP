@@ -14,8 +14,8 @@ namespace QuantConnect.Lean.LeanSTP
             }
             catch (Exception e)
             {
-                Console.WriteLine("No Algorithm was selected, so the default ForexVanillaMomentum will be run");
-                algorithm = "ForexVanillaMomentum";
+                Console.WriteLine("No Algorithm was selected, so the default TradingStrategiesBasedOnGeneticAlgorithms will be run");
+                algorithm = "TradingStrategiesBasedOnGeneticAlgorithms";
             }
 
             var baseFolder = args.Length > 1

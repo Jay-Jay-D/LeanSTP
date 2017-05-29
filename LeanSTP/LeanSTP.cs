@@ -59,33 +59,32 @@ namespace QuantConnect.Lean.LeanSTP
         /// </summary>
         /// <param name="algorithm">The algorithm.</param>
         /// <param name="outputFolder">The output folder.</param>
-        /// <returns></returns>
+        /// <returns>The backtest parameter of all the runs.</returns>
         private static Queue<KeyValuePair<string, string>[]> GenerateRunsArguments(string algorithm, string outputFolder)
         {
-            string[] brokers = { "fxcm", "oanda" };
-            decimal[] maxExposure = { .2m, .3m, .4m, .5m, .8m };
-            int[] leverages = { 1, 5, 10, 20, 50 };
-            int[] cash = { 10000, 50000, 100000, 500000, 1000000 };
-            int[] pairstoTrade = { 1, 2, 3, 4, 5 };
-
+            string file = @"C:\Users\jjd\Desktop\GAExperiment_2017-05-28_0211\GenomesForOOS.csv";
+            string[] headers = null;
+            var lines = File.ReadAllLines(file);
             var args = new List<KeyValuePair<string, string>[]>();
-
-            foreach (var broker in brokers)
-            foreach (var max_exposure in maxExposure)
-            foreach (var leverage in leverages)
-            foreach (var initial_cash in cash)
-            foreach (var pairs_to_trade in pairstoTrade)
+            for (int idx = 0; idx < lines.Length - 1; idx++)
             {
-                args.Add(new[]
+                var obs = lines[idx].Split(',');
+                if (idx == 0)
+                {
+                    headers = obs;
+                    continue;
+                }
+                var runParameters = new List<KeyValuePair<string, string>>
                 {
                     new KeyValuePair<string, string>("algorithm", algorithm),
-                    new KeyValuePair<string, string>("outputFolder", outputFolder),
-                    new KeyValuePair<string, string>("broker", broker),
-                    new KeyValuePair<string, string>("max_exposure", max_exposure.ToString()),
-                    new KeyValuePair<string, string>("leverage", leverage.ToString()),
-                    new KeyValuePair<string, string>("initial_cash", initial_cash.ToString()),
-                    new KeyValuePair<string, string>("pairs_to_trade", pairs_to_trade.ToString()),
-                });
+                    new KeyValuePair<string, string>("outputFolder", outputFolder)
+                };
+
+                for (int jdx = 0; jdx < obs.Length - 1; jdx++)
+                {
+                    runParameters.Add(new KeyValuePair<string, string>(headers[jdx], obs[jdx]));
+                }
+                args.Add(runParameters.ToArray());
             }
             return new Queue<KeyValuePair<string, string>[]>(args);
         }

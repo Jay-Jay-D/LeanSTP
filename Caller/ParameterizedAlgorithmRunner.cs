@@ -39,13 +39,15 @@ namespace QuantConnect.Lean.Caller
 
 
                 var fileIdSb = new StringBuilder(algorithm);
-                var guid = Guid.NewGuid().ToString();
+                fileIdSb.Append(string.Format("_ID{0}", parameters["ID"]));
+                //var guid = Guid.NewGuid().ToString().Substring(startIndex: 0, length: 8);
                 //fileIdSb.Append(guid);
 
-                foreach (var parameter in parameters)
-                {
-                    fileIdSb.Append("_" + parameter.Value);
-                }
+                // The TradingStrategiesBasedOnGeneticAlgorithms project has 28 parameters, it can throws error for name length.
+                //foreach (var parameter in parameters)
+                //{
+                //    fileIdSb.Append("_" + parameter.Value);
+                //}
                 var logFilePath = Path.Combine(outputFolder, string.Format("Backtest_{0}.log", fileIdSb));
 
                 var debugEnabled = Log.DebuggingEnabled;
@@ -84,6 +86,7 @@ namespace QuantConnect.Lean.Caller
                     dynamic results = new ExpandoObject();
                     results.BacktestStatistics = backtestStatistics;
                     results.CustomStatistics = algorithmCustomStatistics;
+
                     var resultsFileName = string.Format("BacktestResults_{0}.json", fileIdSb);
                     File.WriteAllText(Path.Combine(outputFolder, resultsFileName), JsonConvert.SerializeObject(results, Formatting.Indented));
                 }
