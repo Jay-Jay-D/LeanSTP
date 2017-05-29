@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using QuantConnect.Configuration;
+﻿using QuantConnect.Configuration;
 using QuantConnect.Indicators;
+using System;
+using System.Collections.Generic;
 
 namespace QuantConnect.Algorithm.CSharp
 {
@@ -23,11 +20,12 @@ namespace QuantConnect.Algorithm.CSharp
                 var indicatorSignal = SetUpIndicatorSignal(pair, i, ruleAction);
                 technicalIndicatorSignals.Add(indicatorSignal);
 
-                if (i != _indicatorSignalCount)
-                {
-                    var parsedOperator = Config.GetInt(ruleAction + "Operator" + i) == 0 ? "or" : "and";
-                    logicalOperators.Add(parsedOperator);
-                }
+                // As the operators are always one less than the indicator, this 'if' skips the operator after the last indicator.
+                if (i == _indicatorSignalCount) continue;
+                var key = ruleAction + "Operator" + i;
+                var intOperator = GetGeneIntFromKey(key);
+                var parsedOperator = intOperator == 0 ? "or" : "and";
+                logicalOperators.Add(parsedOperator);
             }
             return new TradingRule(technicalIndicatorSignals.ToArray(), logicalOperators.ToArray());
         }
@@ -35,15 +33,15 @@ namespace QuantConnect.Algorithm.CSharp
         private ITechnicalIndicatorSignal SetUpIndicatorSignal(Symbol pair, int indicatorN, string ruleAction)
         {
             var oscillatorThresholds = new OscillatorThresholds { Lower = 20, Upper = 80 };
-            var direction = Config.GetInt(ruleAction + "Indicator" + indicatorN + "Direction") == 0
+            var key = ruleAction + "Indicator" + indicatorN + "Direction";
+            var intDirection = GetGeneIntFromKey(key);
+
+            var direction = intDirection == 0
                 ? TradeRuleDirection.LongOnly
                 : TradeRuleDirection.ShortOnly;
 
-            var indicatorId = Config.GetInt(ruleAction + "Indicator" + indicatorN, -1);
-            //TODO: make the right stuff here.
-            if (indicatorId == -1)
-                throw new ArgumentException(
-                    "Please check the optimization.json! There are not as many indicators as it should.");
+            key = ruleAction + "Indicator" + indicatorN;
+            var indicatorId = GetGeneIntFromKey(key);
             var indicator = (TechicalIndicators)indicatorId;
             ITechnicalIndicatorSignal technicalIndicator = null;
             switch (indicator)
@@ -101,6 +99,33 @@ namespace QuantConnect.Algorithm.CSharp
             }
 
             return technicalIndicator;
+        }
+
+        /// <summary>
+        /// Gets the gene int from key.
+        /// </summary>
+        /// <param name="key">The key.</param>
+        /// <returns></returns>
+        /// <exception cref="System.ArgumentNullException">The gene " + key + " is not present either as Config or as Parameter</exception>
+        /// <remarks>
+        /// This method makes the algorithm working with the genes defined from the Config (as in the Lean Optimization) and from the Parameters (as the Lean Caller).
+        /// </remarks>
+        private int GetGeneIntFromKey(string key)
+        {
+            var intGene = Config.GetInt(key, int.MinValue);
+            if (intGene == int.MinValue)
+            {
+                try
+                {
+                    intGene = int.Parse(GetParameter(key));
+                }
+                catch (ArgumentNullException e)
+                {
+                    throw new ArgumentNullException(key,
+                        "The gene " + key + " is not present either as Config or as Parameter");
+                }
+            }
+            return intGene;
         }
     }
 }
