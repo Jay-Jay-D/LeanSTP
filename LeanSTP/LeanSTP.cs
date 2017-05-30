@@ -66,7 +66,7 @@ namespace QuantConnect.Lean.LeanSTP
             string[] headers = null;
             var lines = File.ReadAllLines(file);
             var args = new List<KeyValuePair<string, string>[]>();
-            for (int idx = 0; idx < lines.Length - 1; idx++)
+            for (int idx = 0; idx < lines.Length; idx++)
             {
                 var obs = lines[idx].Split(',');
                 if (idx == 0)
@@ -80,7 +80,7 @@ namespace QuantConnect.Lean.LeanSTP
                     new KeyValuePair<string, string>("outputFolder", outputFolder)
                 };
 
-                for (int jdx = 0; jdx < obs.Length - 1; jdx++)
+                for (int jdx = 0; jdx < obs.Length; jdx++)
                 {
                     runParameters.Add(new KeyValuePair<string, string>(headers[jdx], obs[jdx]));
                 }
