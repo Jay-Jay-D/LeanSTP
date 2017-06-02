@@ -216,8 +216,10 @@
     <Compile Include="TradingStrategiesBasedOnGeneticAlgorithms\OscillatorSignal.cs" />
     <Compile Include="TradingStrategiesBasedOnGeneticAlgorithms\TestingQCAlgorithms.cs" />
     <Compile Include="TradingStrategiesBasedOnGeneticAlgorithms\TradingRule.cs" />
+    <Compile Include="TradingStrategiesBasedOnGeneticAlgorithms\TradingRuleQCVersion.cs" />
     <Compile Include="TradingStrategiesBasedOnGeneticAlgorithms\TradingRuleSetUp.cs" />
     <Compile Include="TradingStrategiesBasedOnGeneticAlgorithms\TradingStrategiesBasedOnGeneticAlgorithms.cs" />
+    <Compile Include="TradingStrategiesBasedOnGeneticAlgorithms\TradingStrategiesBasedOnGeneticAlgorithmsQCVersion.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Algorithm\QuantConnect.Algorithm.csproj">
