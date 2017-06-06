@@ -37,7 +37,7 @@ namespace QuantConnect.Algorithm.CSharp
             if (!_entryradingRule.IsReady) return;
             if (!Portfolio.Invested)
             {
-                if (_entryradingRule.TradeRuleSignal) SetHoldings(_pair, 0.1m);
+                if (_entryradingRule.TradeRuleSignal) SetHoldings(_pair, 1m);
             }
             else
             {

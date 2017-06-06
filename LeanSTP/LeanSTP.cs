@@ -33,7 +33,7 @@ namespace QuantConnect.Lean.LeanSTP
                 EnableLocalPerformanceCounters = true,
                 StartSuspended = true,
                 DisposeOfStateObjects = true,
-                MaxWorkerThreads = 8 // Default: 25
+                MaxWorkerThreads = 4 // Default: 25
             };
 
             _smartThreadPool = new SmartThreadPool(stpStartInfo);
