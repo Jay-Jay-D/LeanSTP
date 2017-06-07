@@ -62,7 +62,7 @@ namespace QuantConnect.Lean.LeanSTP
         /// <returns>The backtest parameter of all the runs.</returns>
         private static Queue<KeyValuePair<string, string>[]> GenerateRunsArguments(string algorithm, string outputFolder)
         {
-            string file = @"C:\Users\jjd\Desktop\GAExperiment_2017-05-28_0211\GenomesForOOS.csv";
+            string file = @"C:\Users\jjd\Desktop\GAExperiment_2017-05-28_0211\SelectedIndividualsForOOS.csv";
             string[] headers = null;
             var lines = File.ReadAllLines(file);
             var args = new List<KeyValuePair<string, string>[]>();

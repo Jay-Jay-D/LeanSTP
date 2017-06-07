@@ -1,5 +1,5 @@
-﻿using QuantConnect.Indicators;
-using System;
+﻿using System;
+using QuantConnect.Indicators;
 
 namespace QuantConnect.Algorithm.CSharp
 {
@@ -42,8 +42,13 @@ namespace QuantConnect.Algorithm.CSharp
         {
             _moving_average_difference = fast_moving_average.Minus(slow_moving_average);
             _moving_average_difference.Updated += ma_Updated;
-            if (tradeRuleDirection != null) _tradeRuleDirection = (TradeRuleDirection)tradeRuleDirection;
+            if (tradeRuleDirection != null) _tradeRuleDirection = (TradeRuleDirection) tradeRuleDirection;
         }
+
+        /// <summary>
+        ///     Gets the actual state of both moving averages.
+        /// </summary>
+        public CrossingMovingAveragesSignals Signal { get; private set; }
 
         /// <summary>
         ///     Gets a value indicating whether this instance is ready.
@@ -55,11 +60,6 @@ namespace QuantConnect.Algorithm.CSharp
         {
             get { return _moving_average_difference.IsReady; }
         }
-
-        /// <summary>
-        ///     Gets the actual state of both moving averages.
-        /// </summary>
-        public CrossingMovingAveragesSignals Signal { get; private set; }
 
         /// <summary>
         ///     Gets the signal. Only used if the instance will be part of a <see cref="TradingRule" /> class.
@@ -97,7 +97,7 @@ namespace QuantConnect.Algorithm.CSharp
             var actualSignal = Math.Sign(_moving_average_difference);
             if (actualSignal == _lastSignal || _lastSignal == 0)
             {
-                Signal = (CrossingMovingAveragesSignals)actualSignal;
+                Signal = (CrossingMovingAveragesSignals) actualSignal;
             }
             else if (_lastSignal == -1 && actualSignal == 1)
             {

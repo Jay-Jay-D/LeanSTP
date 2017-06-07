@@ -15,9 +15,9 @@ namespace QuantConnect.Algorithm.CSharp
 
         public override void Initialize()
         {
-            SetStartDate(2014, 10, 01);
-            SetEndDate(2014, 12, 30);
-            SetCash(10000);
+            SetStartDate(year: 2014, month: 10, day: 01);
+            SetEndDate(year: 2014, month: 12, day: 30);
+            SetCash(startingCash: 10000);
             spy = AddEquity("SPY", Resolution.Daily).Symbol;
         }
     }
@@ -33,7 +33,7 @@ namespace QuantConnect.Algorithm.CSharp
         {
             if (isFirst)
             {
-                rsi = RSI(spy, 14, MovingAverageType.Wilders);
+                rsi = RSI(spy, period: 14, movingAverageType: MovingAverageType.Wilders);
                 var threshodls = new OscillatorThresholds {Lower = 40, Upper = 60};
                 oscillatorRsi = new OscillatorSignal(rsi, threshodls);
                 CsvOutput = new StringBuilder("Date,RSI,OscillatorSignal\n");
@@ -63,7 +63,7 @@ namespace QuantConnect.Algorithm.CSharp
         {
             if (isFirst)
             {
-                actualRsi = RSI(spy, 14, MovingAverageType.Wilders);
+                actualRsi = RSI(spy, period: 14, movingAverageType: MovingAverageType.Wilders);
                 oscillatorRsi = new OscillatorSignal(actualRsi);
                 isFirst = false;
             }
@@ -108,11 +108,11 @@ namespace QuantConnect.Algorithm.CSharp
         {
             if (isFirst)
             {
-                var injectedRsi = RSI(spy, 14, MovingAverageType.Wilders);
+                var injectedRsi = RSI(spy, period: 14, movingAverageType: MovingAverageType.Wilders);
                 var threshodls = new OscillatorThresholds {Lower = 40, Upper = 60};
                 oscillatorRsi = new OscillatorSignal(injectedRsi, threshodls);
                 var csv = File.ReadAllLines(@".\TestData\testSignals.csv");
-                testingData = csv.Skip(1).Select(l => l.Split(','))
+                testingData = csv.Skip(count: 1).Select(l => l.Split(','))
                     .ToDictionary(l => DateTime.ParseExact(l[0], "yyyy-MM-dd", CultureInfo.InvariantCulture).Date,
                         l => (OscillatorSignals) Enum.Parse(typeof(OscillatorSignals), l[2]));
 

@@ -140,6 +140,7 @@ namespace QuantConnect.Algorithm.CSharp
                 try
                 {
                     intGene = int.Parse(GetParameter(key));
+                    Log(string.Format("Parameter {0} set to {1}", key, intGene));
                 }
                 catch (ArgumentNullException e)
                 {

@@ -16,9 +16,6 @@ namespace QuantConnect.Algorithm.CSharp
     internal class TradingStrategiesBasedOnGeneticAlgorithmsQCVersion : QCAlgorithm
     {
         private readonly int _indicatorSignalCount = 5;
-        private TradingRuleQCVersion _entryradingRule;
-        private TradingRuleQCVersion _exitTradingRule;
-        private Symbol _pair;
 
         /// <summary>
         ///     Here are the parameters of the individual with the best in-sample fitness.
@@ -37,7 +34,7 @@ namespace QuantConnect.Algorithm.CSharp
             {"EntryIndicator5Direction", "1"},
             {"ExitIndicator1", "4"},
             {"ExitIndicator2", "3"},
-            {"ExitIndicator3", "7"},
+            {"ExitIndicator3", "2"},
             {"ExitIndicator4", "1"},
             {"ExitIndicator5", "2"},
             {"ExitIndicator1Direction", "1"},
@@ -47,6 +44,10 @@ namespace QuantConnect.Algorithm.CSharp
             {"ExitIndicator5Direction", "0"}
         };
 
+        private TradingRuleQCVersion _entryradingRule;
+        private TradingRuleQCVersion _exitTradingRule;
+        private Symbol _pair;
+
         public override void Initialize()
         {
             SetCash(startingCash: 1e6);
@@ -55,6 +56,7 @@ namespace QuantConnect.Algorithm.CSharp
             SetEndDate(startDate.AddMonths(months: 1));
 
             _pair = AddForex("EURUSD", leverage: 10).Symbol;
+            //SetBrokerageModel(BrokerageName.FxcmBrokerage);
 
             SetParameters(parametersToBacktest);
 
@@ -66,7 +68,7 @@ namespace QuantConnect.Algorithm.CSharp
             if (!_entryradingRule.IsReady) return;
             if (!Portfolio.Invested)
             {
-                if (_entryradingRule.TradeRuleSignal) SetHoldings(_pair, percentage: 0.1m);
+                if (_entryradingRule.TradeRuleSignal) SetHoldings(_pair, percentage: 1m);
             }
             else
             {
@@ -175,6 +177,7 @@ namespace QuantConnect.Algorithm.CSharp
                 try
                 {
                     intGene = int.Parse(GetParameter(key));
+                    Log(string.Format("Parameter {0} set to {1}", key, intGene));
                 }
                 catch (ArgumentNullException e)
                 {

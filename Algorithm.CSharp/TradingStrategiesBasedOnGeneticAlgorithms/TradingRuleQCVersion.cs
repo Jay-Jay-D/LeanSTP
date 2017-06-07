@@ -2,8 +2,8 @@ namespace QuantConnect.Algorithm.CSharp
 {
     internal class TradingRuleQCVersion
     {
-        private readonly ITechnicalIndicatorSignal[] _technicalIndicatorSignals;
         private readonly bool _isEntryRule;
+        private readonly ITechnicalIndicatorSignal[] _technicalIndicatorSignals;
 
         public TradingRuleQCVersion(ITechnicalIndicatorSignal[] technicalIndicatorSignals, bool isEntryRule)
         {
@@ -30,7 +30,7 @@ namespace QuantConnect.Algorithm.CSharp
         }
 
         /// <summary>
-        /// Gets the trade rule signal for the best in-sample performance individual.
+        ///     Gets the trade rule signal for the best in-sample performance individual.
         /// </summary>
         /// <returns></returns>
         private bool GetTradeRuleSignal()
@@ -38,19 +38,19 @@ namespace QuantConnect.Algorithm.CSharp
             var signal = false;
             if (_isEntryRule)
             {
-                signal = _technicalIndicatorSignals[0].GetSignal() &&   // Long SMA signal
-                         _technicalIndicatorSignals[1].GetSignal() ||   // Long Stochastic
-                         _technicalIndicatorSignals[2].GetSignal() &&   // Long RelativeStrengthIndex
-                         _technicalIndicatorSignals[3].GetSignal() ||   // Short MovingAverageConvergenceDivergence
-                         _technicalIndicatorSignals[4].GetSignal();     // Short MovingAverageConvergenceDivergence
+                signal = _technicalIndicatorSignals[0].GetSignal() && //  Long SimpleMovingAverage
+                         _technicalIndicatorSignals[1].GetSignal() || //  Long Stochastic
+                         _technicalIndicatorSignals[2].GetSignal() && //  Long RelativeStrengthIndex
+                         _technicalIndicatorSignals[3].GetSignal() || //  Short MovingAverageConvergenceDivergence
+                         _technicalIndicatorSignals[4].GetSignal(); //  Short MomentumPercent
             }
             else
             {
-                signal = _technicalIndicatorSignals[0].GetSignal() ||   // Short CommodityChannelIndex
-                         _technicalIndicatorSignals[1].GetSignal() &&   // Long RelativeStrengthIndex
-                         _technicalIndicatorSignals[2].GetSignal() ||   // Short PercentagePriceOscillator
-                         _technicalIndicatorSignals[3].GetSignal() &&   // Short MovingAverageConvergenceDivergence
-                         _technicalIndicatorSignals[4].GetSignal();     // Short Stochastic
+                signal = _technicalIndicatorSignals[0].GetSignal() || //  Short CommodityChannelIndex
+                         _technicalIndicatorSignals[1].GetSignal() && //  Long RelativeStrengthIndex
+                         _technicalIndicatorSignals[2].GetSignal() || //  Short Stochastic
+                         _technicalIndicatorSignals[3].GetSignal() && //  Long MovingAverageConvergenceDivergence
+                         _technicalIndicatorSignals[4].GetSignal(); //  Long Stochastic
             }
             return signal;
         }
