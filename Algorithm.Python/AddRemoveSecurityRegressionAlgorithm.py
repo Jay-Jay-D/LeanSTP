@@ -31,33 +31,33 @@ class AddRemoveSecurityRegressionAlgorithm(QCAlgorithm):
         self.SetEndDate(2013,10,11)    #Set End Date
         self.SetCash(100000)           #Set Strategy Cash
         # Find more symbols here: http://quantconnect.com/data
-        self.spy = self.AddEquity("SPY")
+        self.AddEquity("SPY")
         
         self._lastAction = None
 
 
     def OnData(self, data):
         '''OnData event is the primary entry point for your algorithm. Each new data point will be pumped in here.'''
-        if self._lastAction is not None and self._lastAction.Date == self.Time.Date:
+        if self._lastAction is not None and self._lastAction.date() == self.Time.date():
             return
 
         if not self.Portfolio.Invested:
-            self.SetHoldings(self.spy.Symbol, .5)
+            self.SetHoldings("SPY", .5)
             self._lastAction = self.Time
 
-        if self.Time.DayOfWeek == DayOfWeek.Tuesday:
-            self.aig = self.AddEquity("AIG")
-            self.bac = self.AddEquity("BAC")
+        if self.Time.weekday() == 1:
+            self.AddEquity("AIG")
+            self.AddEquity("BAC")
             self._lastAction = self.Time
 
-        if self.Time.DayOfWeek == DayOfWeek.Wednesday:
-            self.SetHoldings(self.aig.Symbol, .25)
-            self.SetHoldings(self.bac.Symbol, .25)
+        if self.Time.weekday() == 2:
+            self.SetHoldings("AIG", .25)
+            self.SetHoldings("BAC", .25)
             self._lastAction = self.Time
 
-        if self.Time.DayOfWeek == DayOfWeek.Thursday:
-            self.RemoveSecurity(self.aig.Symbol)
-            self.RemoveSecurity(self.bac.Symbol)
+        if self.Time.weekday() == 3:
+            self.RemoveSecurity("AIG")
+            self.RemoveSecurity("BAC")
             self._lastAction = self.Time
 
     def OnOrderEvent(self, orderEvent):

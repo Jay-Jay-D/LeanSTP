@@ -19,9 +19,11 @@ using System.Linq;
 using Newtonsoft.Json;
 using QuantConnect.AlgorithmFactory;
 using QuantConnect.Brokerages;
+using QuantConnect.Brokerages.InteractiveBrokers;
 using QuantConnect.Configuration;
 using QuantConnect.Data.Market;
 using QuantConnect.Interfaces;
+using QuantConnect.Lean.Engine.DataFeeds;
 using QuantConnect.Lean.Engine.RealTime;
 using QuantConnect.Lean.Engine.Results;
 using QuantConnect.Lean.Engine.TransactionHandlers;
@@ -63,7 +65,6 @@ namespace QuantConnect.Lean.Engine.Setup
         public int MaxOrders { get; private set; }
 
         // saves ref to algo so we can call quit if runtime error encountered
-        private IAlgorithm _algorithm;
         private IBrokerageFactory _factory;
 
         /// <summary>
@@ -144,8 +145,6 @@ namespace QuantConnect.Lean.Engine.Setup
         /// <returns>True on successfully setting up the algorithm state, or false on error.</returns>
         public bool Setup(IAlgorithm algorithm, IBrokerage brokerage, AlgorithmNodePacket job, IResultHandler resultHandler, ITransactionHandler transactionHandler, IRealTimeHandler realTimeHandler)
         {
-            _algorithm = algorithm;
-
             // verify we were given the correct job packet type
             var liveJob = job as LiveNodePacket;
             if (liveJob == null)
@@ -186,17 +185,35 @@ namespace QuantConnect.Lean.Engine.Setup
                     {
                         //Set the default brokerage model before initialize
                         algorithm.SetBrokerageModel(_factory.BrokerageModel);
+
                         //Margin calls are disabled by default in live mode
                         algorithm.Portfolio.MarginCallModel = MarginCallModel.Null;
+
                         //Set our parameters
                         algorithm.SetParameters(job.Parameters);
                         algorithm.SetAvailableDataTypes(GetConfiguredDataFeeds());
+
                         //Algorithm is live, not backtesting:
                         algorithm.SetLiveMode(true);
+
                         //Initialize the algorithm's starting date
                         algorithm.SetDateTime(DateTime.UtcNow);
+
                         //Set the source impl for the event scheduling
                         algorithm.Schedule.SetEventSchedule(realTimeHandler);
+
+                        // set the option chain provider
+                        algorithm.SetOptionChainProvider(new CachingOptionChainProvider(new LiveOptionChainProvider()));
+
+                        // If we're going to receive market data from IB, 
+                        // set the default subscription limit to 100,
+                        // algorithms can override this setting in the Initialize method
+                        if (brokerage is InteractiveBrokersBrokerage &&
+                            liveJob.DataQueueHandler.EndsWith("InteractiveBrokersBrokerage"))
+                        {
+                            algorithm.Settings.DataSubscriptionLimit = 100;
+                        }
+
                         //Initialise the algorithm, get the required data:
                         algorithm.Initialize();
                         if (liveJob.Brokerage != "PaperBrokerage")
@@ -210,7 +227,7 @@ namespace QuantConnect.Lean.Engine.Setup
                     }
                     catch (Exception err)
                     {
-                        AddInitializationError(err.Message);
+                        AddInitializationError(err.ToString());
                     }
                 }, controls.RamAllocation);
 
@@ -272,7 +289,7 @@ namespace QuantConnect.Lean.Engine.Setup
                     foreach (var order in openOrders)
                     {
                         // be sure to assign order IDs such that we increment from the SecurityTransactionManager to avoid ID collisions
-                        Log.Trace("BrokerageSetupHandler.Setup(): Has open order: " + order.Symbol.ToString() + " - " + order.Quantity);
+                        Log.Trace("BrokerageSetupHandler.Setup(): Has open order: " + order.Symbol.Value + " - " + order.Quantity);
                         order.Id = algorithm.Transactions.GetIncrementOrderId();
                         transactionHandler.Orders.AddOrUpdate(order.Id, order, (i, o) => order);
                     }
@@ -308,36 +325,17 @@ namespace QuantConnect.Lean.Engine.Setup
 
                         if (!algorithm.Portfolio.ContainsKey(holding.Symbol))
                         {
-                            Log.Trace("BrokerageSetupHandler.Setup(): Adding unrequested security: " + holding.Symbol.ToString());
+                            Log.Trace("BrokerageSetupHandler.Setup(): Adding unrequested security: " + holding.Symbol.Value);
 
-                            var marketHoursDatabase = MarketHoursDatabase.FromDataFolder();
-                            var symbolPropertiesDatabase = SymbolPropertiesDatabase.FromDataFolder();
-
-                            // if we adding option, we have to add the option universe, so we take underlying symbol
-                            // Implemented solution is temporary. We will remove this code once it is the idea on how to refactor IAlgorithm is matured. 
                             if (holding.Type == SecurityType.Option)
                             {
-                                var underlying = holding.Symbol.Underlying.Value;
-
-                                // adding entire option universe to the system
-                                var canonicalOption = algorithm.AddSecurity(holding.Type, underlying, minResolution.Value, null, true, 1.0m, false);
-                                var universe = algorithm.UniverseManager.Where(x => x.Key == canonicalOption.Symbol).First().Value;
-
-                                // adding current option contract to the system
-                                var option = universe.CreateSecurity(holding.Symbol, algorithm, marketHoursDatabase, symbolPropertiesDatabase);
-                                algorithm.Securities.Add(holding.Symbol, option);
+                                // add current option contract to the system
+                                algorithm.AddOptionContract(holding.Symbol, minResolution.Value, true, 1.0m);
                             }
                             else if (holding.Type == SecurityType.Future)
                             {
-                                var underlying = holding.Symbol.ID.Symbol;
-
-                                // adding entire future universe to the system
-                                var canonicalFuture = algorithm.AddSecurity(holding.Type, underlying, minResolution.Value, null, true, 1.0m, false);
-                                var universe = algorithm.UniverseManager.First(x => x.Key == canonicalFuture.Symbol).Value;
-
-                                // adding current future contract to the system
-                                var future = universe.CreateSecurity(holding.Symbol, algorithm, marketHoursDatabase, symbolPropertiesDatabase);
-                                algorithm.Securities.Add(holding.Symbol, future);
+                                // add current future contract to the system
+                                algorithm.AddFutureContract(holding.Symbol, minResolution.Value, true, 1.0m);
                             }
                             else
                             {
@@ -346,7 +344,7 @@ namespace QuantConnect.Lean.Engine.Setup
                             }
                         }
 
-                        algorithm.Portfolio[holding.Symbol].SetHoldings(holding.AveragePrice, (int) holding.Quantity);
+                        algorithm.Portfolio[holding.Symbol].SetHoldings(holding.AveragePrice, holding.Quantity);
                         algorithm.Securities[holding.Symbol].SetMarketPrice(new TradeBar
                         {
                             Time = DateTime.Now,
@@ -375,7 +373,7 @@ namespace QuantConnect.Lean.Engine.Setup
             }
             catch (Exception err)
             {
-                AddInitializationError(err.Message);
+                AddInitializationError(err.ToString());
             }
             finally
             {

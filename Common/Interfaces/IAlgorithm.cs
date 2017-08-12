@@ -24,8 +24,9 @@ using QuantConnect.Notifications;
 using QuantConnect.Orders;
 using QuantConnect.Scheduling;
 using QuantConnect.Securities;
-using QuantConnect.Statistics;
 using System.Collections.Concurrent;
+using QuantConnect.Securities.Future;
+using QuantConnect.Securities.Option;
 
 namespace QuantConnect.Interfaces
 {
@@ -250,7 +251,7 @@ namespace QuantConnect.Interfaces
         /// <summary>
         /// Customizable dynamic statistics displayed during live trading:
         /// </summary>
-        Dictionary<string, string> RuntimeStatistics
+        ConcurrentDictionary<string, string> RuntimeStatistics
         {
             get;
         }
@@ -276,6 +277,22 @@ namespace QuantConnect.Interfaces
         /// Gets the Trade Builder to generate trades from executions
         /// </summary>
         ITradeBuilder TradeBuilder
+        {
+            get;
+        }
+
+        /// <summary>
+        /// Gets the user settings for the algorithm
+        /// </summary>
+        AlgorithmSettings Settings
+        {
+            get;
+        }
+
+        /// <summary>
+        /// Gets the option chain provider, used to get the list of option contracts for an underlying symbol
+        /// </summary>
+        IOptionChainProvider OptionChainProvider
         {
             get;
         }
@@ -458,6 +475,26 @@ namespace QuantConnect.Interfaces
         Security AddSecurity(SecurityType securityType, string symbol, Resolution resolution, string market, bool fillDataForward, decimal leverage, bool extendedMarketHours);
 
         /// <summary>
+        /// Creates and adds a new single <see cref="Future"/> contract to the algorithm
+        /// </summary>
+        /// <param name="symbol">The futures contract symbol</param>
+        /// <param name="resolution">The <see cref="Resolution"/> of market data, Tick, Second, Minute, Hour, or Daily. Default is <see cref="Resolution.Minute"/></param>
+        /// <param name="fillDataForward">If true, returns the last available data even if none in that timeslice. Default is <value>true</value></param>
+        /// <param name="leverage">The requested leverage for this equity. Default is set by <see cref="SecurityInitializer"/></param>
+        /// <returns>The new <see cref="Future"/> security</returns>
+        Future AddFutureContract(Symbol symbol, Resolution resolution = Resolution.Minute, bool fillDataForward = true, decimal leverage = 0m);
+
+        /// <summary>
+        /// Creates and adds a new single <see cref="Option"/> contract to the algorithm
+        /// </summary>
+        /// <param name="symbol">The option contract symbol</param>
+        /// <param name="resolution">The <see cref="Resolution"/> of market data, Tick, Second, Minute, Hour, or Daily. Default is <see cref="Resolution.Minute"/></param>
+        /// <param name="fillDataForward">If true, returns the last available data even if none in that timeslice. Default is <value>true</value></param>
+        /// <param name="leverage">The requested leverage for this equity. Default is set by <see cref="SecurityInitializer"/></param>
+        /// <returns>The new <see cref="Option"/> security</returns>
+        Option AddOptionContract(Symbol symbol, Resolution resolution = Resolution.Minute, bool fillDataForward = true, decimal leverage = 0m);
+
+        /// <summary>
         /// Removes the security with the specified symbol. This will cancel all
         /// open orders and then liquidate any existing holdings
         /// </summary>
@@ -541,5 +578,11 @@ namespace QuantConnect.Interfaces
         /// </summary>
         /// <param name="availableDataTypes">>The different <see cref="TickType"/> each <see cref="Security"/> supports</param>
         void SetAvailableDataTypes(Dictionary<SecurityType, List<TickType>> availableDataTypes);
+
+        /// <summary>
+        /// Sets the option chain provider, used to get the list of option contracts for an underlying symbol
+        /// </summary>
+        /// <param name="optionChainProvider">The option chain provider</param>
+        void SetOptionChainProvider(IOptionChainProvider optionChainProvider);
     }
 }

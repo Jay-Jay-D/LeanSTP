@@ -27,11 +27,32 @@ using QuantConnect.Python;
 using Python.Runtime;
 using QuantConnect.Data.UniverseSelection;
 using QuantConnect.Data.Fundamental;
+using System.Linq;
 
 namespace QuantConnect.Algorithm
 {
     public partial class QCAlgorithm
     {
+        private dynamic _pandas;
+
+        /// <summary>
+        /// Sets pandas library
+        /// </summary>
+        public void SetPandas()
+        {
+            try
+            {
+                using (Py.GIL())
+                {
+                    _pandas = Py.Import("pandas");
+                }
+            }
+            catch (PythonException pythonException)
+            {
+                Error("QCAlgorithm.SetPandas(): Failed to import pandas module: " + pythonException);
+            }
+        }
+
         /// <summary>
         /// AddData a new user defined data source, requiring only the minimum config options.
         /// The data is added with a default time zone of NewYork (Eastern Daylight Savings Time)
@@ -44,7 +65,7 @@ namespace QuantConnect.Algorithm
         {
             AddData(type, symbol, Resolution.Minute, TimeZones.NewYork, false, 1m);
         }
-        
+
 
         /// <summary>
         /// AddData a new user defined data source, requiring only the minimum config options.
@@ -57,8 +78,7 @@ namespace QuantConnect.Algorithm
         /// <param name="leverage">Custom leverage per security</param>
         public void AddData(PyObject type, string symbol, Resolution resolution, DateTimeZone timeZone, bool fillDataForward = false, decimal leverage = 1.0m)
         {
-            var objectType = CreateType(type.Repr().Split('.')[1].Replace("\'>", ""));
-            AddData(objectType, symbol, resolution, timeZone, fillDataForward, leverage);
+            AddData(CreateType(type), symbol, resolution, timeZone, fillDataForward, leverage);
         }
 
         /// <summary>
@@ -108,7 +128,7 @@ namespace QuantConnect.Algorithm
             var fine = ToFunc<FineFundamental>(pyfine);
             AddUniverse(coarse, fine);
         }
-        
+
         /// <summary>
         /// Registers the consolidator to receive automatic updates as well as configures the indicator to receive updates
         /// from the consolidator.
@@ -215,102 +235,233 @@ namespace QuantConnect.Algorithm
         /// Plots the value of each indicator on the chart
         /// </summary>
         /// <param name="chart">The chart's name</param>
-        /// <param name="indicators">The indicatorsto plot</param>
+        /// <param name="first">The first indicator to plot</param>
+        /// <param name="second">The second indicator to plot</param>
+        /// <param name="third">The third indicator to plot</param>
+        /// <param name="fourth">The fourth indicator to plot</param>
         /// <seealso cref="Plot(string,string,decimal)"/>
-        public void Plot(string chart, params IndicatorBase<IndicatorDataPoint>[] indicators)
+        public void Plot(string chart, Indicator first, Indicator second = null, Indicator third = null, Indicator fourth = null)
         {
-            Plot<IndicatorDataPoint>(chart, indicators);
+            Plot(chart, new[] { first, second, third, fourth }.Where(x => x != null).ToArray());
         }
 
         /// <summary>
         /// Plots the value of each indicator on the chart
         /// </summary>
         /// <param name="chart">The chart's name</param>
-        /// <param name="indicators">The indicatorsto plot</param>
+        /// <param name="first">The first indicator to plot</param>
+        /// <param name="second">The second indicator to plot</param>
+        /// <param name="third">The third indicator to plot</param>
+        /// <param name="fourth">The fourth indicator to plot</param>
         /// <seealso cref="Plot(string,string,decimal)"/>
-        public void Plot(string chart, params IndicatorBase<IBaseDataBar>[] indicators)
+        public void Plot(string chart, BarIndicator first, BarIndicator second = null, BarIndicator third = null, BarIndicator fourth = null)
         {
-            Plot<IBaseDataBar>(chart, indicators);
+            Plot(chart, new[] { first, second, third, fourth }.Where(x => x != null).ToArray());
         }
 
         /// <summary>
         /// Plots the value of each indicator on the chart
         /// </summary>
         /// <param name="chart">The chart's name</param>
-        /// <param name="indicators">The indicatorsto plot</param>
+        /// <param name="first">The first indicator to plot</param>
+        /// <param name="second">The second indicator to plot</param>
+        /// <param name="third">The third indicator to plot</param>
+        /// <param name="fourth">The fourth indicator to plot</param>
         /// <seealso cref="Plot(string,string,decimal)"/>
-        public void Plot(string chart, params IndicatorBase<TradeBar>[] indicators)
+        public void Plot(string chart, TradeBarIndicator first, TradeBarIndicator second = null, TradeBarIndicator third = null, TradeBarIndicator fourth = null)
         {
-            Plot<TradeBar>(chart, indicators);
+            Plot(chart, new[] { first, second, third, fourth }.Where(x => x != null).ToArray());
         }
 
         /// <summary>
         /// Automatically plots each indicator when a new value is available
         /// </summary>
-        public void PlotIndicator(string chart, params IndicatorBase<IndicatorDataPoint>[] indicators)
+        public void PlotIndicator(string chart, Indicator first, Indicator second = null, Indicator third = null, Indicator fourth = null)
         {
-            PlotIndicator<IndicatorDataPoint>(chart, indicators);
+            PlotIndicator(chart, new[] { first, second, third, fourth }.Where(x => x != null).ToArray());
         }
 
         /// <summary>
         /// Automatically plots each indicator when a new value is available
         /// </summary>
-        public void PlotIndicator(string chart, params IndicatorBase<IBaseDataBar>[] indicators)
+        public void PlotIndicator(string chart, BarIndicator first, BarIndicator second = null, BarIndicator third = null, BarIndicator fourth = null)
         {
-            PlotIndicator<IBaseDataBar>(chart, indicators);
+            PlotIndicator(chart, new[] { first, second, third, fourth }.Where(x => x != null).ToArray());
         }
 
         /// <summary>
         /// Automatically plots each indicator when a new value is available
         /// </summary>
-        public void PlotIndicator(string chart, params IndicatorBase<TradeBar>[] indicators)
+        public void PlotIndicator(string chart, TradeBarIndicator first, TradeBarIndicator second = null, TradeBarIndicator third = null, TradeBarIndicator fourth = null)
         {
-            PlotIndicator<TradeBar>(chart, indicators);
+            PlotIndicator(chart, new[] { first, second, third, fourth }.Where(x => x != null).ToArray());
         }
 
         /// <summary>
         /// Automatically plots each indicator when a new value is available, optionally waiting for indicator.IsReady to return true
         /// </summary>
-        public void PlotIndicator(string chart, bool waitForReady, params IndicatorBase<IndicatorDataPoint>[] indicators)
+        public void PlotIndicator(string chart, bool waitForReady, Indicator first, Indicator second = null, Indicator third = null, Indicator fourth = null)
         {
-            PlotIndicator<IndicatorDataPoint>(chart, waitForReady, indicators);
+            PlotIndicator(chart, waitForReady, new[] { first, second, third, fourth }.Where(x => x != null).ToArray());
         }
 
         /// <summary>
         /// Automatically plots each indicator when a new value is available, optionally waiting for indicator.IsReady to return true
         /// </summary>
-        public void PlotIndicator(string chart, bool waitForReady, params IndicatorBase<IBaseDataBar>[] indicators)
+        public void PlotIndicator(string chart, bool waitForReady, BarIndicator first, BarIndicator second = null, BarIndicator third = null, BarIndicator fourth = null)
         {
-            PlotIndicator<IBaseDataBar>(chart, waitForReady, indicators);
+            PlotIndicator(chart, waitForReady, new[] { first, second, third, fourth }.Where(x => x != null).ToArray());
         }
 
         /// <summary>
         /// Automatically plots each indicator when a new value is available, optionally waiting for indicator.IsReady to return true
         /// </summary>
-        public void PlotIndicator(string chart, bool waitForReady, params IndicatorBase<TradeBar>[] indicators)
+        public void PlotIndicator(string chart, bool waitForReady, TradeBarIndicator first, TradeBarIndicator second = null, TradeBarIndicator third = null, TradeBarIndicator fourth = null)
         {
-            PlotIndicator<TradeBar>(chart, waitForReady, indicators);
+            PlotIndicator(chart, waitForReady, new[] { first, second, third, fourth }.Where(x => x != null).ToArray());
+        }
+
+        /// <summary>
+        /// Gets the historical data for the specified symbol. The exact number of bars will be returned. 
+        /// The symbol must exist in the Securities collection.
+        /// </summary>
+        /// <param name="tickers">The symbols to retrieve historical data for</param>
+        /// <param name="periods">The number of bars to request</param>
+        /// <param name="resolution">The resolution to request</param>
+        /// <returns>A python dictionary with pandas DataFrame containing the requested historical data</returns>
+        public PyObject History(PyObject tickers, int periods, Resolution? resolution = null)
+        {
+            var symbols = GetSymbolsFromPyObject(tickers);
+            if (symbols == null) return null;
+
+            return CreatePandasDataFrame(symbols, History(symbols, periods, resolution));
+        }
+
+        /// <summary>
+        /// Gets the historical data for the specified symbols over the requested span.
+        /// The symbols must exist in the Securities collection.
+        /// </summary>
+        /// <param name="tickers">The symbols to retrieve historical data for</param>
+        /// <param name="span">The span over which to retrieve recent historical data</param>
+        /// <param name="resolution">The resolution to request</param>
+        /// <returns>A python dictionary with pandas DataFrame containing the requested historical data</returns>
+        public PyObject History(PyObject tickers, TimeSpan span, Resolution? resolution = null)
+        {
+            var symbols = GetSymbolsFromPyObject(tickers);
+            if (symbols == null) return null;
+
+            return CreatePandasDataFrame(symbols, History(symbols, span, resolution));
+        }
+
+        /// <summary>
+        /// Gets the historical data for the specified symbol between the specified dates. The symbol must exist in the Securities collection.
+        /// </summary>
+        /// <param name="tickers">The symbols to retrieve historical data for</param>
+        /// <param name="start">The start time in the algorithm's time zone</param>
+        /// <param name="end">The end time in the algorithm's time zone</param>
+        /// <param name="resolution">The resolution to request</param>
+        /// <returns>A python dictionary with pandas DataFrame containing the requested historical data</returns>
+        public PyObject History(PyObject tickers, DateTime start, DateTime end, Resolution? resolution = null)
+        {
+            var symbols = GetSymbolsFromPyObject(tickers);
+            if (symbols == null) return null;
+
+            return CreatePandasDataFrame(symbols, History(symbols, start, end, resolution));
+        }
+
+        /// <summary>
+        /// Creates a pandas DataFrame from an enumerable of slice containing the requested historical data
+        /// </summary>
+        /// <param name="symbols">The symbols to retrieve historical data for</param>
+        /// <param name="history">an enumerable of slice containing the requested historical data</param>
+        /// <returns>A python dictionary with pandas DataFrame containing the requested historical data</returns>
+        private PyObject CreatePandasDataFrame(List<Symbol> symbols, IEnumerable<Slice> history)
+        {
+            // If pandas is null (cound not be imported), return null
+            if (_pandas == null)
+            {
+                return null;
+            }
+
+            using (Py.GIL())
+            {
+                var pyDict = new PyDict();
+
+                foreach (var symbol in symbols)
+                {
+                    var index = Securities[symbol].Type == SecurityType.Equity
+                        ? history.Get<TradeBar>(symbol).Select(x => x.Time)
+                        : history.Get<QuoteBar>(symbol).Select(x => x.Time);
+
+                    var dataframe = new PyDict();
+                    dataframe.SetItem("open", _pandas.Series(history.Get(symbol, Field.Open).ToList(), index));
+                    dataframe.SetItem("high", _pandas.Series(history.Get(symbol, Field.High).ToList(), index));
+                    dataframe.SetItem("low", _pandas.Series(history.Get(symbol, Field.Low).ToList(), index));
+                    dataframe.SetItem("close", _pandas.Series(history.Get(symbol, Field.Close).ToList(), index));
+                    dataframe.SetItem("volume", _pandas.Series(history.Get(symbol, Field.Volume).ToList(), index));
+
+                    pyDict.SetItem(symbol.Value, _pandas.DataFrame(dataframe, columns: new[] { "open", "high", "low", "close", "volume" }.ToList()));
+                }
+
+                return pyDict;
+            }
+        }
+
+        /// <summary>
+        /// Gets the symbols/string from a PyObject
+        /// </summary>
+        /// <param name="pyObject">PyObject containing symbols</param>
+        /// <returns>List of symbols</returns>
+        private List<Symbol> GetSymbolsFromPyObject(PyObject pyObject)
+        {
+            using (Py.GIL())
+            {
+                if (PyString.IsStringType(pyObject))
+                {
+                    Security security;
+                    if (Securities.TryGetValue(pyObject.ToString(), out security))
+                    {
+                        return new List<Symbol> { security.Symbol };
+                    }
+                    return null;
+                }
+
+                var symbols = new List<Symbol>();
+                foreach (var item in pyObject)
+                {
+                    Security security;
+                    if (Securities.TryGetValue(item.ToString(), out security))
+                    {
+                        symbols.Add(security.Symbol);
+                    }
+                }
+                return symbols.Count == 0 ? null : symbols;
+            }
         }
 
         /// <summary>
         /// Creates a type with a given name
         /// </summary>
-        /// <param name="typeName">Name of the new type</param>
+        /// <param name="type">Python object</param>
         /// <returns>Type object</returns>
-        private Type CreateType(string typeName)
+        private Type CreateType(PyObject type)
         {
-            var an = new AssemblyName(typeName);
-            var assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(an, AssemblyBuilderAccess.Run);
-            var moduleBuilder = assemblyBuilder.DefineDynamicModule("MainModule");
-            return moduleBuilder.DefineType(typeName,
-                    TypeAttributes.Public |
-                    TypeAttributes.Class |
-                    TypeAttributes.AutoClass |
-                    TypeAttributes.AnsiClass |
-                    TypeAttributes.BeforeFieldInit |
-                    TypeAttributes.AutoLayout,
-                    typeof(PythonData))
-                .CreateType();
+            using (Py.GIL())
+            {
+                var an = new AssemblyName(type.Repr().Split('.')[1].Replace("\'>", ""));
+                var assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(an, AssemblyBuilderAccess.Run);
+                var moduleBuilder = assemblyBuilder.DefineDynamicModule("MainModule");
+                return moduleBuilder.DefineType(an.Name,
+                        TypeAttributes.Public |
+                        TypeAttributes.Class |
+                        TypeAttributes.AutoClass |
+                        TypeAttributes.AnsiClass |
+                        TypeAttributes.BeforeFieldInit |
+                        TypeAttributes.AutoLayout,
+                        // If the type has IsAuthCodeSet member, it is a PythonQuandl
+                        type.HasAttr("IsAuthCodeSet") ? typeof(PythonQuandl) : typeof(PythonData))
+                    .CreateType();
+            }
         }
 
         /// <summary>

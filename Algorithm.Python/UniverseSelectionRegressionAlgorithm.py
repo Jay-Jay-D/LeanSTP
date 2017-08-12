@@ -11,8 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from datetime import datetime
-
 from clr import AddReference
 AddReference("System.Core")
 AddReference("QuantConnect.Common")
@@ -24,7 +22,8 @@ from QuantConnect import *
 from QuantConnect.Algorithm import *
 from QuantConnect.Orders import *
 from QuantConnect.Data.UniverseSelection import *
-from AlgorithmPythonUtil import to_python_datetime
+from datetime import datetime
+
 
 class UniverseSelectionRegressionAlgorithm(QCAlgorithm):
     '''Basic template algorithm simply initializes the date range and cash'''
@@ -37,12 +36,9 @@ class UniverseSelectionRegressionAlgorithm(QCAlgorithm):
         self.SetCash(100000)           #Set Strategy Cash
         # Find more symbols here: http://quantconnect.com/data
         # security that exists with no mappings
-        equity_spy = self.AddEquity("SPY", Resolution.Daily)
+        self.AddEquity("SPY", Resolution.Daily)
         # security that doesn't exist until half way in backtest (comes in as GOOCV)
-        equity_goog = self.AddSecurity(SecurityType.Equity, "GOOG", Resolution.Daily)
-
-        self.spy = equity_spy.Symbol
-        self.goog = equity_goog.Symbol        
+        self.AddEquity("GOOG", Resolution.Daily)
 
         self.UniverseSettings.Resolution = Resolution.Daily                
         self.AddUniverse(self.CoarseSelectionFunction)
@@ -62,14 +58,12 @@ class UniverseSelectionRegressionAlgorithm(QCAlgorithm):
     def OnData(self, data):
         '''OnData event is the primary entry point for your algorithm. Each new data point will be pumped in here.'''
         if self.Transactions.OrdersCount == 0:
-            self.MarketOrder(self.spy, 100)
+            self.MarketOrder("SPY", 100)
 
         for kvp in data.Delistings:
             self.__delistedSymbols.append(kvp.Key)
 
-        pyTime = to_python_datetime(self.Time)
-
-        if pyTime.date == datetime(2014, 4, 7):
+        if self.Time.date == datetime(2014, 4, 7):
             self.Liquidade()
             return
 
@@ -78,12 +72,12 @@ class UniverseSelectionRegressionAlgorithm(QCAlgorithm):
         
         for security in self.__changes.AddedSecurities:
             if security.Symbol in data:
-                self.Log("{0}: Added Security: {1}".format(pyTime, security.Symbol))
+                self.Log("{0}: Added Security: {1}".format(self.Time, security.Symbol))
                 self.MarketOnOpenOrder(security.Symbol, 100)
 
         for security in self.__changes.RemovedSecurities:
             if security.Symbol in data:
-                self.Log("{0}: Removed Security: {1}".format(pyTime, security.Symbol))
+                self.Log("{0}: Removed Security: {1}".format(self.Time, security.Symbol))
                 if security.Symbol not in self.__delistedSymbols:
                     self.Log("Not in delisted: {0}:".format(security.Symbol))
                     self.MarketOnOpenOrder(security.Symbol, -100)

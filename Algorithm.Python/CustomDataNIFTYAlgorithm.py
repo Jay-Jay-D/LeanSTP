@@ -11,12 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from datetime import date, timedelta
-import decimal
-import numpy as np
-import math
-import json
-
 from clr import AddReference
 AddReference("System")
 AddReference("QuantConnect.Algorithm")
@@ -27,6 +21,11 @@ from QuantConnect import *
 from QuantConnect.Algorithm import *
 from QuantConnect.Data import SubscriptionDataSource
 from QuantConnect.Python import PythonData
+from datetime import date, timedelta, datetime
+import decimal
+import numpy as np
+import math
+import json
 
 class CustomDataNIFTYAlgorithm(QCAlgorithm):
     '''3.0 CUSTOM DATA SOURCE: USE YOUR OWN MARKET DATA (OPTIONS, FOREX, FUTURES, DERIVATIVES etc).
@@ -42,45 +41,41 @@ class CustomDataNIFTYAlgorithm(QCAlgorithm):
 
         # Define the symbol and "type" of our generic data:
         self.AddData(DollarRupee, "USDINR")
-        self.rupee = self.Securities["USDINR"].Symbol
         self.AddData(Nifty, "NIFTY")
-        self.nifty = self.Securities["NIFTY"].Symbol
-
-        self.AddEquity("SPY", Resolution.Daily)     
-
+        
         self.minimumCorrelationHistory = 50
         self.today = CorrelationPair()
         self.prices = []
         
 
     def OnData(self, data):
-        if self.rupee in data:
+        if "USDINR" in data:
             self.today = CorrelationPair(self.Time)
-            self.today.CurrencyPrice = data[self.rupee].Close
+            self.today.CurrencyPrice = data["USDINR"].Close
 
-        if self.nifty not in data: return
+        if "NIFTY" not in data: return
 
-        self.today.NiftyPrice = data[self.nifty].Close
+        self.today.NiftyPrice = data["NIFTY"].Close
 
-        if self.today.Date == data[self.nifty].Time:
+        if self.today.date() == data["NIFTY"].Time.date():
             self.prices.append(self.today)
             if len(self.prices) > self.minimumCorrelationHistory:
                 self.prices.pop(0)
-
+        
         # Strategy
-        if self.Time.DayOfWeek != DayOfWeek.Wednesday: return
+        if self.Time.weekday() != 2: return
 
-        cur_qnty = self.Portfolio[self.nifty].Quantity
-        quantity = math.floor(self.Portfolio.TotalPortfolioValue * decimal.Decimal(0.9) / data[self.nifty].Close)
+        cur_qnty = self.Portfolio["NIFTY"].Quantity
+        quantity = decimal.Decimal(math.floor(self.Portfolio.MarginRemaining * decimal.Decimal(0.9) / data["NIFTY"].Close))
         hi_nifty = max(price.NiftyPrice for price in self.prices)
         lo_nifty = min(price.NiftyPrice for price in self.prices)
 
-        if data[self.nifty].Open >= hi_nifty:
-            code = self.Order(self.nifty,  quantity - cur_qnty)
-            self.Debug("LONG  {0} Time: {1} Quantity: {2} Portfolio: {3} Nifty: {4} Buying Power: {5}".format(code, self.Time.ToShortDateString(), quantity, self.Portfolio[self.nifty].Quantity, data[self.nifty].Close, self.Portfolio.TotalPortfolioValue))
-        elif data[self.nifty].Open <= lo_nifty:
-            code = self.Order(self.nifty, -quantity - cur_qnty)
-            self.Debug("SHORT {0} Time: {1} Quantity: {2} Portfolio: {3} Nifty: {4} Buying Power: {5}".format(code, self.Time.ToShortDateString(), quantity, self.Portfolio[self.nifty].Quantity, data[self.nifty].Close, self.Portfolio.TotalPortfolioValue))
+        if data["NIFTY"].Open >= hi_nifty:
+            code = self.Order("NIFTY",  quantity - cur_qnty)
+            self.Debug("LONG  {0} Time: {1} Quantity: {2} Portfolio: {3} Nifty: {4} Buying Power: {5}".format(code, self.Time, quantity, self.Portfolio["NIFTY"].Quantity, data["NIFTY"].Close, self.Portfolio.TotalPortfolioValue))
+        elif data["NIFTY"].Open <= lo_nifty:
+            code = self.Order("NIFTY", -quantity - cur_qnty)
+            self.Debug("SHORT {0} Time: {1} Quantity: {2} Portfolio: {3} Nifty: {4} Buying Power: {5}".format(code, self.Time, quantity, self.Portfolio["NIFTY"].Quantity, data["NIFTY"].Close, self.Portfolio.TotalPortfolioValue))
 
 
 class Nifty(PythonData):
@@ -101,7 +96,7 @@ class Nifty(PythonData):
             # Date,       Open       High        Low       Close     Volume      Turnover
             # 2011-09-13  7792.9    7799.9     7722.65    7748.7    116534670    6107.78
             data = line.split(',')
-            index.Time = DateTime.ParseExact(data[0], "yyyy-MM-dd", None)            
+            index.Time = datetime.strptime(data[0], "%Y-%m-%d")            
             index.Value = decimal.Decimal(data[4])
             index["Open"] = float(data[1])
             index["High"] = float(data[2])
@@ -130,7 +125,7 @@ class DollarRupee(PythonData):
         
         try:
             data = line.split(',')
-            currency.Time = DateTime.Parse(data[0])
+            currency.Time = datetime.strptime(data[0], "%Y-%m-%d")
             currency.Value = decimal.Decimal(data[1])
             currency["Close"] = float(data[1])
             
@@ -144,7 +139,10 @@ class DollarRupee(PythonData):
 class CorrelationPair:
     '''Correlation Pair is a helper class to combine two data points which we'll use to perform the correlation.'''
     def __init__(self, *args):
-        self.NiftyPrice = 0       # Nifty price for this correlation pair
-        self.CurrencyPrice = 0    # Currency price for this correlation pair
-        self.Date = DateTime()    # Date of the correlation pair
-        if len(args) > 0: self.Date = args[0]
+        self.NiftyPrice = 0        # Nifty price for this correlation pair
+        self.CurrencyPrice = 0     # Currency price for this correlation pair
+        self._date = datetime.min    # Date of the correlation pair
+        if len(args) > 0: self._date = args[0]
+
+    def date(self):
+        return self._date.date()

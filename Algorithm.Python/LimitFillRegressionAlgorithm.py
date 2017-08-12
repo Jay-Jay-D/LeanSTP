@@ -19,8 +19,6 @@ AddReference("QuantConnect.Common")
 from System import *
 from QuantConnect import *
 from QuantConnect.Algorithm import *
-from AlgorithmPythonUtil import to_python_datetime
-from datetime import datetime, timedelta
 
 class LimitFillRegressionAlgorithm(QCAlgorithm):
     '''Basic template algorithm simply initializes the date range and cash'''
@@ -32,21 +30,17 @@ class LimitFillRegressionAlgorithm(QCAlgorithm):
         self.SetEndDate(2013,10,11)    #Set End Date
         self.SetCash(100000)           #Set Strategy Cash
         # Find more symbols here: http://quantconnect.com/data
-        equity = self.AddEquity("SPY", Resolution.Second)
-        self.spy = equity.Symbol
-
-        start_date = to_python_datetime(self.StartDate)
-        end_date = to_python_datetime(self.EndDate)
-        self.mid_datetime = start_date + (end_date - start_date)/2
+        self.AddEquity("SPY", Resolution.Second)
+        
+        self.mid_datetime = self.StartDate + (self.EndDate - self.StartDate)/2
 
 
     def OnData(self, data):
         '''OnData event is the primary entry point for your algorithm. Each new data point will be pumped in here.'''
-        if data.ContainsKey(self.spy):
-            currentTime = to_python_datetime(self.Time)
-            if self.IsRoundHour(currentTime):
-                negative = 1 if currentTime < self.mid_datetime else -1
-                self.LimitOrder(self.spy, negative*10, data[self.spy].Price)
+        if data.ContainsKey("SPY"):
+            if self.IsRoundHour(self.Time):
+                negative = 1 if self.Time < self.mid_datetime else -1
+                self.LimitOrder("SPY", negative*10, data["SPY"].Price)
 
 
     def IsRoundHour(self, dateTime):

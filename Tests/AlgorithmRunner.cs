@@ -99,12 +99,12 @@ namespace QuantConnect.Tests
 
                     var engine = new Lean.Engine.Engine(systemHandlers, algorithmHandlers, false);
                     Task.Factory.StartNew(() =>
-                        {
-                            string algorithmPath;
-                            var job = systemHandlers.JobQueue.NextJob(out algorithmPath);
-                            engine.Run(job, algorithmPath);
-                        })
-                        .Wait();
+                    {
+                        string algorithmPath;
+                        var job = systemHandlers.JobQueue.NextJob(out algorithmPath);
+                        var algorithmManager = new AlgorithmManager(false);
+                        engine.Run(job, algorithmManager, algorithmPath);
+                    }).Wait();
 
                     backtestingResultHandler = (BacktestingResultHandler) algorithmHandlers.Results;
                     Log.DebuggingEnabled = debugEnabled;
