@@ -417,17 +417,17 @@ namespace QuantConnect.Tests
                 {"Drawdown", "0.000%"},
                 {"Expectancy", "-1"},
                 {"Net Profit", "-0.006%"},
-                {"Sharpe Ratio", "-3.235"},
+                {"Sharpe Ratio", "-3.403"},
                 {"Loss Rate", "100%"},
                 {"Win Rate", "0%"},
                 {"Profit-Loss Ratio", "0"},
                 {"Alpha", "-0.016"},
                 {"Beta", "-0.001"},
-                {"Annual Standard Deviation", "0.002"},
+                {"Annual Standard Deviation", "0.001"},
                 {"Annual Variance", "0"},
                 {"Information Ratio", "10.014"},
                 {"Tracking Error", "0.877"},
-                {"Treynor Ratio", "3.955"},
+                {"Treynor Ratio", "4.203"},
                 {"Total Fees", "$2.50"},
             };
 
@@ -499,19 +499,20 @@ namespace QuantConnect.Tests
                 {"Treynor Ratio", "0.391"},
                 {"Total Fees", "$23.05"},
             };
-        var optionExerciseAssignRegressionAlgorithmStatistics = new Dictionary<string, string>
+
+            var optionExerciseAssignRegressionAlgorithmStatistics = new Dictionary<string, string>
             {
                 {"Total Trades", "4"},
                 {"Average Win", "0.30%"},
-                {"Average Loss", "-0.20%"},
-                {"Compounding Annual Return", "-42.722%"},
+                {"Average Loss", "-0.32%"},
+                {"Compounding Annual Return", "-85.023%"},
                 {"Drawdown", "0.400%"},
-                {"Expectancy", "-0.168"},
-                {"Net Profit", "-0.103%"},
+                {"Expectancy", "-0.359"},
+                {"Net Profit", "-0.350%"},
                 {"Sharpe Ratio", "0"},
                 {"Loss Rate", "67%"},
                 {"Win Rate", "33%"},
-                {"Profit-Loss Ratio", "1.50"},
+                {"Profit-Loss Ratio", "0.92"},
                 {"Alpha", "0"},
                 {"Beta", "0"},
                 {"Annual Standard Deviation", "0"},

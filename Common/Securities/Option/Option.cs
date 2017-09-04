@@ -187,7 +187,7 @@ namespace QuantConnect.Securities.Option
         /// <returns></returns>
         public decimal GetExerciseQuantity(decimal quantity)
         {
-            return quantity * ContractUnitOfTrade / ContractMultiplier;
+            return quantity * ContractUnitOfTrade;
         }
 
         /// <summary>
@@ -250,10 +250,29 @@ namespace QuantConnect.Securities.Option
         /// <summary>
         /// When enabled, approximates Greeks if corresponding pricing model didn't calculate exact numbers
         /// </summary>
+        [Obsolete("This property has been deprecated. Please use QLOptionPriceModel.EnableGreekApproximation instead.")]
         public bool EnableGreekApproximation
         {
-            get; set;
+            get
+            {
+                var model = PriceModel as QLOptionPriceModel;
+                if (model != null)
+                {
+                    return model.EnableGreekApproximation;
+                }
+                return false;
+            }
+
+            set
+            {
+                var model = PriceModel as QLOptionPriceModel;
+                if (model != null)
+                {
+                   model.EnableGreekApproximation = value;
+                }
+            }
         }
+
         /// <summary>
         /// Gets or sets the contract filter
         /// </summary>
