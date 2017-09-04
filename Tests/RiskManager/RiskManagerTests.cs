@@ -56,9 +56,8 @@ namespace QuantConnect.Tests.RiskManager
                 var forexDefaultQuoteCurrency = forexSymbol.Value.Substring(3);
 
                 var forexSymbolProperties = _symbolPropertiesDatabase.GetSymbolProperties(forexSymbol.ID.Market, forexSymbol, forexSymbol.ID.SecurityType, forexDefaultQuoteCurrency);
-                var subscriptionTypes = new List<Type> { typeof(QuoteBar) };
 
-                var forex = SecurityManager.CreateSecurity(subscriptionTypes, _portfolio, _subscriptionManager, forexMarketHoursDbEntry.ExchangeHours,
+                var forex = SecurityManager.CreateSecurity(typeof(QuoteBar), _portfolio, _subscriptionManager, forexMarketHoursDbEntry.ExchangeHours,
                                                             forexMarketHoursDbEntry.DataTimeZone, forexSymbolProperties, _securityInitializer,
                                                             forexSymbol, Resolution.Minute,
                                                             true, 1m, false, false, false, false);
