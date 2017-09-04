@@ -38,7 +38,8 @@ namespace QuantConnect.Algorithm.CSharp
         // User defined variables (add any user defined variables below)
         private RelativeStrengthIndex _rsi;
         private Momentum _mom;
-        private RollingWindow<int> mp, cc;
+        private RollingWindow<int> mp;
+        private RollingWindow<decimal> cc;
         public RollingWindow<IndicatorDataPoint> _rsiwindow;
         public RollingWindow<IndicatorDataPoint> _momwindow;
         RollingWindow<QuoteBar> _datawindow;
@@ -91,7 +92,7 @@ namespace QuantConnect.Algorithm.CSharp
             };
             //
             mp = new RollingWindow<int>(candlesBack);
-            cc = new RollingWindow<int>(candlesBack);
+            cc = new RollingWindow<decimal>(candlesBack);
             //
             myTime0 = new DateTime(0);
             myTime1 = new DateTime(0);
