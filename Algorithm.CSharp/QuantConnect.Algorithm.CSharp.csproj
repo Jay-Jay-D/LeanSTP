@@ -86,6 +86,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="QCForumAlgorithms\IndicatorForFutures.cs" />
     <Compile Include="QCUExamples\BasicTemplateFxcmVolumeAlgorithm.cs" />
     <Compile Include="QCUExamples\BasicTemplateFuturesAlgorithmDaily.cs" />
     <Compile Include="QCUExamples\CallingRFromCSharp.cs" />
