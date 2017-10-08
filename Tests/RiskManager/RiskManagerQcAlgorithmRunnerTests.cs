@@ -6,7 +6,7 @@ namespace QuantConnect.Tests.RiskManager
     public class RiskManagerQcAlgorithmRunnerTests
     {
         [Test]
-        [Ignore("QC account data should be configured in the config.json file.")]
+        //[Ignore("QC account data should be configured in the config.json file.")]
         public void RunRiskManagerAlgorithm()
         {
             // Arrange

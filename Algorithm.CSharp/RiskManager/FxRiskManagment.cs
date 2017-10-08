@@ -95,10 +95,40 @@ namespace QuantConnect.Algorithm.CSharp.RiskManager
                     moneyAtRisk = Math.Min(moneyAtRisk, (decimal)maxMoneyAtRisk);
                 }
 
-                var maxQuantitybyRisk = moneyAtRisk / (volatility * exchangeRate);
+                decimal maxQuantitybyRisk;
+                try
+                {
+                    maxQuantitybyRisk = moneyAtRisk / (volatility * exchangeRate);
+                }
+                catch (DivideByZeroException)
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkYellow;
+                    Console.WriteLine(string
+                                          .Format("Dividing by zero estimating maxQuantitybyRisk. Volatility: {0:F6}, ExchangeRate: {1:F6}",
+                                                  volatility, exchangeRate));
+                    Console.WriteLine("Set maxQuantitybyRisk equal to min quantity.");
+                    Console.ResetColor();
+                    maxQuantitybyRisk = _lotSize * _minQuantity;
+                }
+
                 // Estimate the maximum entry order quantity given the exposure per trade.
                 var maxBuySize = Math.Min(_portfolio.MarginRemaining, _portfolio.TotalPortfolioValue * _maxExposurePerTrade) * leverage;
-                var maxQuantitybyExposure = maxBuySize / (closePrice * exchangeRate);
+                decimal maxQuantitybyExposure;
+                try
+                {
+                    maxQuantitybyExposure = maxBuySize / (closePrice * exchangeRate);
+                }
+                catch
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkYellow;
+                    Console.WriteLine(string
+                                          .Format("Dividing by zero estimating maxQuantitybyExposure. ClosePrice: {0:F6}, ExchangeRate: {1:F6}",
+                                                  closePrice, exchangeRate));
+                    Console.WriteLine("Set maxQuantitybyExposure equal to min quantity.");
+                    Console.ResetColor();
+                    maxQuantitybyExposure = _lotSize * _minQuantity;
+                }
+
                 // The final quantity is the lowest of both.
                 quantity = (int)(Math.Floor(Math.Min(maxQuantitybyRisk, maxQuantitybyExposure) / _lotSize) * _lotSize);
                 // If the final quantity is lower than the minimum quantity of the given lot size, then return zero.
