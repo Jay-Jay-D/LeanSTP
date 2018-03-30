@@ -1,0 +1,91 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>QuantConnect.Lean</id>
+    <version>2.4.0.1</version>
+    <authors>QuantConnect Team and Community Contributors</authors>
+    <owners>QuantConnect Corporation</owners>
+    <licenseUrl>https://github.com/QuantConnect/Lean/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/QuantConnect/Lean</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Lean Engine is an open-source fully managed C# algorithmic trading engine built for desktop and cloud usage. It was designed in Mono and operates in Windows, Linux and Mac platforms. The community has contributed additional connectors to F#, Visual Basic and Java.</description>
+    <releaseNotes>See release notes on the QuantConnect Blog: https://www.quantconnect.com/blog/tag/release-notes </releaseNotes>
+    <copyright>Copyright 2017</copyright>
+    <tags>'algorithmic trading', 'quant', 'quantconnect'</tags>
+    <iconUrl>https://github.com/QuantConnect/Lean/raw/master/Documentation/logo.white.small.png</iconUrl>
+    <dependencies>
+        <group targetFramework="net452">
+            <dependency id="Baseclass.Contrib.Nuget.Output" version="2.2.0-xbuild02"/>
+            <dependency id="DynamicInterop" version="0.7.4"/>
+            <dependency id="R.NET.Community" version="1.6.5"/>
+            <dependency id="MathNet.Numerics" version="3.19.0"/>
+            <dependency id="MathNet.Filtering" version="0.4.0"/>
+            <dependency id="Newtonsoft.Json" version="10.0.3"/>
+            <dependency id="NodaTime" version="1.3.4"/>
+            <dependency id="CloneExtensions" version="1.3.0" />
+            <dependency id="DotNetZip" version="1.10.1" />
+            <dependency id="IKVM-WithExes" version="7.3.4830.1" targetFramework="net452" />
+            <dependency id="NLog" version="4.4.11" targetFramework="net452" />
+            <dependency id="NLog.Config" version="4.4.11" targetFramework="net452" />
+            <dependency id="NLog.Schema" version="4.4.11" targetFramework="net452" />
+
+            <dependency id="QuantConnect.pythonnet" version="1.0.4.4" targetFramework="net45" />
+            <dependency id="SharpZipLib" version="0.86.0" targetFramework="net45" />
+            <dependency id="fasterflect" version="2.1.3" targetFramework="net45" />
+            <dependency id="SharpZipLib" version="0.86.0" targetFramework="net45" />
+            <dependency id="RestSharp" version="105.2.3" targetFramework="net45" requireReinstallation="true" />
+        </group>
+    </dependencies>
+    <targetFramework>net452</targetFramework> 
+  </metadata>
+  <files>
+    <file src="Launcher/bin/Debug/QuantConnect.Algorithm.dll" target="lib" />
+    <file src="Launcher/bin/Debug/QuantConnect.Algorithm.xml" target="lib" />
+    <file src="Launcher/bin/Debug/QuantConnect.Algorithm.pdb" target="lib" />
+
+    <file src="Launcher/bin/Debug/QuantConnect.AlgorithmFactory.dll" target="lib" />
+    <file src="Launcher/bin/Debug/QuantConnect.AlgorithmFactory.xml" target="lib" />
+    <file src="Launcher/bin/Debug/QuantConnect.AlgorithmFactory.pdb" target="lib" />
+
+    <file src="Launcher/bin/Debug/QuantConnect.Api.dll" target="lib" />
+    <file src="Launcher/bin/Debug/QuantConnect.Api.xml" target="lib" />
+    <file src="Launcher/bin/Debug/QuantConnect.Api.pdb" target="lib" />
+
+    <file src="Launcher/bin/Debug/QuantConnect.Brokerages.dll" target="lib" />
+    <file src="Launcher/bin/Debug/QuantConnect.Brokerages.xml" target="lib" />
+    <file src="Launcher/bin/Debug/QuantConnect.Brokerages.pdb" target="lib" />
+
+    <file src="Launcher/bin/Debug/QuantConnect.Common.dll" target="lib" />
+    <file src="Launcher/bin/Debug/QuantConnect.Common.xml" target="lib" />
+    <file src="Launcher/bin/Debug/QuantConnect.Common.pdb" target="lib" />
+
+    <file src="Launcher/bin/Debug/QuantConnect.Configuration.dll" target="lib" />
+    <file src="Launcher/bin/Debug/QuantConnect.Configuration.xml" target="lib" />
+    <file src="Launcher/bin/Debug/QuantConnect.Configuration.pdb" target="lib" />
+
+    <file src="Launcher/bin/Debug/QuantConnect.Fxcm.dll" target="lib" />
+    <file src="Launcher/bin/Debug/QuantConnect.Fxcm.xml" target="lib" />
+    <file src="Launcher/bin/Debug/QuantConnect.Fxcm.pdb" target="lib" />
+
+    <file src="Launcher/bin/Debug/QuantConnect.Indicators.dll" target="lib" />
+    <file src="Launcher/bin/Debug/QuantConnect.Indicators.xml" target="lib" />
+    <file src="Launcher/bin/Debug/QuantConnect.Indicators.pdb" target="lib" />
+
+    <file src="Launcher/bin/Debug/QuantConnect.Lean.Engine.dll" target="lib" />
+    <file src="Launcher/bin/Debug/QuantConnect.Lean.Engine.xml" target="lib" />
+    <file src="Launcher/bin/Debug/QuantConnect.Lean.Engine.pdb" target="lib" />
+
+    <file src="Launcher/bin/Debug/QuantConnect.Logging.dll" target="lib" />
+    <file src="Launcher/bin/Debug/QuantConnect.Logging.xml" target="lib" />
+    <file src="Launcher/bin/Debug/QuantConnect.Logging.pdb" target="lib" />
+
+    <file src="Launcher/bin/Debug/QuantConnect.Messaging.dll" target="lib" />
+    <file src="Launcher/bin/Debug/QuantConnect.Messaging.xml" target="lib" />
+    <file src="Launcher/bin/Debug/QuantConnect.Messaging.pdb" target="lib" />
+    <file src="Launcher/bin/Debug/QuantConnect.Queues.dll" target="lib" />
+    <file src="Launcher/bin/Debug/QuantConnect.Queues.xml" target="lib" />
+    <file src="Launcher/bin/Debug/QuantConnect.Queues.pdb" target="lib" />
+    <file src="Launcher/bin/Debug/QuantConnect.ToolBox.exe" target="lib" />
+    <file src="Launcher/bin/Debug/QuantConnect.ToolBox.pdb" target="lib" />
+  </files>
+</package>
