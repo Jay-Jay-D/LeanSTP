@@ -1,0 +1,39 @@
+﻿<?xml version="1.0"?>
+<package>
+  <metadata>
+    <!--*-->
+    <id>$id$</id>
+    <!--*-->
+    <version>$version$</version>
+    <title></title>
+    <!--*-->
+    <authors>$author$</authors>
+    <owners>$author$</owners>
+<!--
+    <licenseUrl></licenseUrl>
+    <projectUrl></projectUrl>
+    <iconUrl></iconUrl>
+-->
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <!--*-->
+    <description>$description$</description>
+    <!--*-->
+    <releaseNotes> </releaseNotes>
+    <copyright>$copyright$</copyright>
+    <tags> </tags>
+    <dependencies>
+         <group targetFramework="net452">
+            <dependency id="Accord" version="3.6.0" />
+            <dependency id="Accord.Fuzzy" version="3.6.0" />
+            <dependency id="Accord.Math" version="3.6.0" />
+            <dependency id="Accord.Statistics" version="3.6.0" />
+            <dependency id="DynamicInterop" version="0.7.4" />
+            <dependency id="MathNet.Numerics" version="3.19.0" />
+            <dependency id="Newtonsoft.Json" version="10.0.3" />
+            <dependency id="NodaTime" version="1.3.4" />
+            <dependency id="QuantConnect.pythonnet" version="1.0.5.5" />
+            <dependency id="R.NET.Community" version="1.6.5" />
+         </group>
+      </dependencies>
+  </metadata>
+</package>
