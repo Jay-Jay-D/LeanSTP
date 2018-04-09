@@ -1,0 +1,30 @@
+﻿<?xml version="1.0"?>
+<package>
+  <metadata>
+    <!--*-->
+    <id>QuantConnect.Lean.Configuration</id>
+    <!--*-->
+    <version>$version$</version>
+    <title></title>
+    <!--*-->
+    <authors>QuantConnect Team and Community Contributors</authors>
+    <owners>QuantConnect Corporation</owners>
+
+    <licenseUrl>https://github.com/QuantConnect/Lean/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/QuantConnect/Lean</projectUrl>
+    <iconUrl>https://github.com/QuantConnect/Lean/blob/master/lean.ico</iconUrl>
+
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <!--*-->
+    <description>Lean Engine is an open-source fully managed C# algorithmic trading engine built for desktop and cloud usage. It was designed in Mono and operates in Windows, Linux and Mac platforms. The community has contributed additional connectors to F#, Visual Basic and Java.</description>
+    <!--*-->
+    <releaseNotes> </releaseNotes>
+    <copyright>$copyright$</copyright>
+    <tags> </tags>
+    <dependencies>
+         <group targetFramework="net452">
+            <dependency id="Newtonsoft.Json" version="10.0.3" />
+         </group>
+      </dependencies>
+  </metadata>
+</package>

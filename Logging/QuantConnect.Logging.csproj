@@ -111,6 +111,7 @@
     <None Include="NLog.xsd">
       <SubType>Designer</SubType>
     </None>
+    <None Include="QuantConnect.Logging.nuspec" />
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>

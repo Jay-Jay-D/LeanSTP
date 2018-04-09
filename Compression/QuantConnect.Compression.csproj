@@ -64,6 +64,7 @@
     <Compile Include="ZipStreamWriter.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="QuantConnect.Compression.nuspec" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

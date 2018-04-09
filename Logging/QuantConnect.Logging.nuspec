@@ -1,0 +1,34 @@
+﻿<?xml version="1.0"?>
+<package>
+  <metadata>
+    <!--*-->
+    <id>QuantConnect.Lean.Logging</id>
+    <!--*-->
+    <version>$version$</version>
+    <title></title>
+    <!--*-->
+    <authors>QuantConnect Team and Community Contributors</authors>
+    <owners>QuantConnect Corporation</owners>
+
+    <licenseUrl>https://github.com/QuantConnect/Lean/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/QuantConnect/Lean</projectUrl>
+    <iconUrl>https://github.com/QuantConnect/Lean/blob/master/lean.ico</iconUrl>
+
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <!--*-->
+    <description>Lean Engine is an open-source fully managed C# algorithmic trading engine built for desktop and cloud usage. It was designed in Mono and operates in Windows, Linux and Mac platforms. The community has contributed additional connectors to F#, Visual Basic and Java.</description>
+    <!--*-->
+    <releaseNotes> </releaseNotes>
+    <copyright>$copyright$</copyright>
+    <tags> </tags>
+    <dependencies>
+         <group targetFramework="net452">
+            <dependency id="MathNet.Filtering" version="0.4.0" />
+            <dependency id="MathNet.Numerics" version="3.19.0" />
+            <dependency id="NLog" version="4.4.11" />
+            <dependency id="NLog.Config" version="4.4.11" />
+            <dependency id="NLog.Schema" version="4.4.11" />
+         </group>
+      </dependencies>
+  </metadata>
+</package>
