@@ -6,8 +6,10 @@
 [assembly: AssemblyCompany("QuantConnect")]
 [assembly: AssemblyTrademark("QuantConnect")]
 [assembly: AssemblyVersion("2.4.0.1")]
+[assembly: AssemblyFileVersion("3390")]
+
 #if DEBUG
-    [assembly: AssemblyConfiguration("Debug")]
+[assembly: AssemblyConfiguration("Debug")]
 #else
-    [assembly: AssemblyConfiguration("Release")]
+[assembly: AssemblyConfiguration("Release")]
 #endif
