@@ -32,7 +32,7 @@
     </frameworkAssemblies>
   </metadata>
   <files>
-    <file src="bin\Release\QuantConnect.Lean.Engine.dll" target="lib\net452\QuantConnect.Lean.Engine.dll" />
-    <file src="bin\Release\QuantConnect.Lean.Engine.xml" target="lib\net452\QuantConnect.Lean.Engine.xml" />
+    <file src="Engine\bin\Release\QuantConnect.Lean.Engine.dll" target="lib\net452\QuantConnect.Lean.Engine.dll" />
+    <file src="Engine\bin\Release\QuantConnect.Lean.Engine.xml" target="lib\net452\QuantConnect.Lean.Engine.xml" />
   </files>
 </package>
