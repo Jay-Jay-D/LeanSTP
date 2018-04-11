@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2011/10/nuspec.xsd">
   <metadata>
-    <id>QuantConnect.Algorithm</id>
+    <id>QuantConnect.Lean.Engine</id>
     <version>$version$</version>
     <authors>QuantConnect Team and Community Contributors</authors>
     <owners>$author$</owners>
