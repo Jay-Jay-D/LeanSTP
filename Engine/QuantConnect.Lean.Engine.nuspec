@@ -40,7 +40,4 @@
       <frameworkAssembly assemblyName="System.ComponentModel.Composition" targetFramework=".NETFramework4.5.2" />
     </frameworkAssemblies>
   </metadata>
-  <files>
-    <file src="config.json" target="Content" />
-  </files>
 </package>
