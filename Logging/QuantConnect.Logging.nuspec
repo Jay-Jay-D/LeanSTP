@@ -13,15 +13,15 @@
     <copyright>$copyright$</copyright>
     <tags>algorithm algorithmic-trading-engine bitcoins broker c-sharp cfd crypto finance future forex fxcm gdax hft hft-trading interactive-brokers lean-engine markets nasdaq oanda options python quant quantconnect quantitative-finance stock-indicators trading trading-algorithms trading-bot trading-platform trading-robots trading-strategies</tags>
     <dependencies>
-      <group targetFramework=".NETFramework4.5.1">
+      <group targetFramework=".NETFramework4.5.2">
         <dependency id="NLog" version="4.4.11" exclude="Build,Analyzers" />
         <dependency id="MathNet.Filtering" version="0.4.0" exclude="Build,Analyzers"/>
         <dependency id="MathNet.Numerics" version="3.19.0" exclude="Build,Analyzers"/>
       </group>
     </dependencies>
     <frameworkAssemblies>
-      <frameworkAssembly assemblyName="Microsoft.CSharp" targetFramework=".NETFramework4.5.1" />
-      <frameworkAssembly assemblyName="System.ComponentModel.Composition" targetFramework=".NETFramework4.5.1" />
+      <frameworkAssembly assemblyName="Microsoft.CSharp" targetFramework=".NETFramework4.5.2" />
+      <frameworkAssembly assemblyName="System.ComponentModel.Composition" targetFramework=".NETFramework4.5.2" />
     </frameworkAssemblies>
     <contentFiles>
       <files include="any/net452/NLog.config" buildAction="Content" />

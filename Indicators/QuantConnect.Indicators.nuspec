@@ -13,7 +13,7 @@
     <copyright>$copyright$</copyright>
     <tags>algorithm algorithmic-trading-engine bitcoins broker c-sharp cfd crypto finance future forex fxcm gdax hft hft-trading interactive-brokers lean-engine markets nasdaq oanda options python quant quantconnect quantitative-finance stock-indicators trading trading-algorithms trading-bot trading-platform trading-robots trading-strategies</tags>
     <dependencies>
-      <group targetFramework=".NETFramework4.5.1">
+      <group targetFramework=".NETFramework4.5.2">
         <dependency id="QuantConnect.Configuration" version="2.4.0.1" exclude="Build,Analyzers" />
         <dependency id="QuantConnect.Logging" version="2.4.0.1" exclude="Build,Analyzers" />
         <dependency id="QuantConnect.Common" version="2.4.0.1" exclude="Build,Analyzers" />
@@ -29,10 +29,10 @@
       </group>
     </dependencies>
     <frameworkAssemblies>
-      <frameworkAssembly assemblyName="Microsoft.CSharp" targetFramework=".NETFramework4.5.1" />
+      <frameworkAssembly assemblyName="Microsoft.CSharp" targetFramework=".NETFramework4.5.2" />
     </frameworkAssemblies>
     <contentFiles>
-      <files include="any/net451/nPython.exe" buildAction="Content" />
+      <files include="any/net452/nPython.exe" buildAction="Content" />
     </contentFiles>
   </metadata>
 </package>
