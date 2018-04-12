@@ -39,7 +39,7 @@
     </frameworkAssemblies>
   </metadata>
   <files>
-    <file src="InteractiveBrokers/CSharpAPI.dll" target="lib/nte452" />
-    <file src="Fxcm/QuantConnect.Fxcm.dll" target="lib/nte452" />
+    <file src="InteractiveBrokers/CSharpAPI.dll" target="lib/net452" />
+    <file src="Fxcm/QuantConnect.Fxcm.dll" target="lib/net452" />
   </files>
 </package>
