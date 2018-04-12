@@ -29,6 +29,7 @@
         <dependency id="QuantConnect.Configuration" version="2.4.0.1" exclude="Build,Analyzers" />
         <dependency id="QuantConnect.Indicators" version="2.4.0.1" exclude="Build,Analyzers" />
         <dependency id="QuantConnect.Logging" version="2.4.0.1" exclude="Build,Analyzers" />
+        <dependency id="QuantConnect.Messaging" version="2.4.0.1" exclude="Build,Analyzers" />
         <dependency id="QuantConnect.pythonnet" version="1.0.5.7" exclude="Build,Analyzers" />
         <dependency id="QuantConnect.Queues" version="2.4.0.1" exclude="Build,Analyzers" />
         <dependency id="RestSharp" version="105.2.3" exclude="Build,Analyzers" />
